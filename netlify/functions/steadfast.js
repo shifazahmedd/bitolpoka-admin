@@ -1,7 +1,4 @@
-const https = require('https');
-
 exports.handler = async function(event, context) {
-    // 1. Handle CORS securely
     if (event.httpMethod === 'OPTIONS') {
         return {
             statusCode: 200,
@@ -18,41 +15,29 @@ exports.handler = async function(event, context) {
         const payload = JSON.parse(event.body);
         const { api_key, secret_key, order_data } = payload;
 
-        const requestBody = JSON.stringify(order_data);
+        // Clean out any accidental invisible spaces
+        const cleanApiKey = (api_key || '').trim();
+        const cleanSecretKey = (secret_key || '').trim();
 
-        // 2. Set up the exact Steadfast connection parameters
-        const options = {
-            hostname: 'portal.steadfast.com.bd',
-            path: '/api/v1/create_order',
+        // ✨ THE MAGIC FIX: Steadfast's actual secret API server is Packzy!
+        const response = await fetch('https://portal.packzy.com/api/v1/create_order', {
             method: 'POST',
             headers: {
-                'Api-Key': (api_key || '').trim(),       // .trim() removes accidental spaces!
-                'Secret-Key': (secret_key || '').trim(), // .trim() removes accidental spaces!
-                'Content-Type': 'application/json',
-                'Content-Length': Buffer.byteLength(requestBody)
-            }
-        };
-
-        // 3. Make the Native Request to bypass all firewall errors
-        const responseBody = await new Promise((resolve, reject) => {
-            const req = https.request(options, (res) => {
-                let body = '';
-                res.on('data', (chunk) => body += chunk);
-                res.on('end', () => resolve({ statusCode: res.statusCode, body }));
-            });
-            req.on('error', (e) => reject(e));
-            req.write(requestBody);
-            req.end();
+                'Api-Key': cleanApiKey,
+                'Secret-Key': cleanSecretKey,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(order_data)
         });
 
-        return {
-            statusCode: responseBody.statusCode,
-            headers: { 'Access-Control-Allow-Origin': '*' },
-            body: responseBody.body
-        };
+        const data = await response.json();
 
+        return {
+            statusCode: response.status,
+            headers: { 'Access-Control-Allow-Origin': '*' },
+            body: JSON.stringify(data)
+        };
     } catch (error) {
-        // Return exactly what caused the failure
         return {
             statusCode: 500,
             headers: { 'Access-Control-Allow-Origin': '*' },
