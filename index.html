@@ -299,7 +299,7 @@
             if (!confirm(`Send this order to Steadfast Courier?`)) return;
 
             try {
-                // Call the Netlify Serverless Backend
+                // Call the Netlify serverless backend
                 const response = await fetch('/.netlify/functions/steadfast', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -318,9 +318,9 @@
 
                 const result = await response.json();
 
-                if (!response.ok || result.status === 400) {
-                    let errorMessage = result.message || JSON.stringify(result.errors || "Unknown Error");
-                    alert(`❌ Steadfast Refused the Order:\n\n${errorMessage}`);
+                // THIS IS THE NEW CODE! IT WILL PRINT EXACTLY WHAT STEADFAST SAYS:
+                if (!response.ok || result.status === 400 || result.errors) {
+                    alert(`❌ Steadfast Refused the Order.\n\nHere is EXACTLY what they said:\n\n${JSON.stringify(result, null, 2)}`);
                     return;
                 }
 
@@ -339,7 +339,7 @@
                 }
 
             } catch (err) {
-                alert(`❌ Server Connection Failed:\n\nCould not reach the Netlify backend. Ensure you deployed via GitHub!`);
+                alert(`❌ Server Connection Failed:\n\nCould not reach the Netlify backend. Make sure your 'netlify/functions/steadfast.js' folder is uploaded correctly!`);
                 console.error(err);
             }
         }
