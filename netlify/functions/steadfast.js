@@ -33,7 +33,7 @@ exports.handler = async function(event, context) {
             }
         };
 
-        // 3. Make the Native Request to bypass all version errors
+        // 3. Make the Native Request to bypass all firewall errors
         const responseBody = await new Promise((resolve, reject) => {
             const req = https.request(options, (res) => {
                 let body = '';
@@ -60,35 +60,3 @@ exports.handler = async function(event, context) {
         };
     }
 };
-```
-5. Click **Commit changes** (twice) to save it.
-
-### Step 2: Stop Hiding the Error in the Admin Panel
-Right now, if Steadfast rejects the order, our code hides their explanation behind "Unknown Error." Let's update `admin.html` to print the *exact* reason Steadfast is rejecting it.
-
-1. Go back to the main page of your GitHub repository.
-2. Click on **`admin.html`**, and click the Pencil icon ✏️ to edit.
-3. Scroll all the way down to **line 273**. You are going to replace exactly **one single line** to reveal the true error.
-
-```html:Easy Admin Panel:admin.html
-<!-- ... existing code ... -->
-                const result = await response.json();
-
-                if (!response.ok || result.status === 400) {
-                    let errorMessage = result.error || result.message || JSON.stringify(result, null, 2);
-                    alert(`❌ Steadfast Refused the Order:\n\n${errorMessage}`);
-                    return;
-                }
-
-                // If successful, save the Tracking ID to the database!
-<!-- ... existing code ... -->
-```
-4. Click **Commit changes** (twice) to save it.
-
-### Step 3: Test the Auto-Deploy
-Because Netlify is watching your GitHub, it is already updating your live site! 
-1. Wait about 30 seconds.
-2. Go to your live Admin Panel (`https://...netlify.app`) and **Hard Refresh** the page (Ctrl + Shift + R).
-3. Click "Send to Steadfast" one more time.
-
-If it works, you will get the green success checkmark! If Steadfast still refuses the order, the popup will now tell us **exactly** why they are rejecting it (e.g., "Phone number must be 11 digits", "Invalid API Key", etc.). Tell me exactly what the popup says!
