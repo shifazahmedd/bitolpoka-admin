@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitolpoka Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans p-6">
+
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6 text-gray-800">Bitolpoka Admin</h1>
+
+        <!-- Navigation Tabs -->
+        <div class="flex space-x-4 mb-6 border-b border-gray-300 pb-2">
+            <button onclick="switchTab('products')" id="tab-products" class="px-4 py-2 bg-blue-600 text-white rounded-md font-semibold transition">Products</button>
+            <button onclick="switchTab('orders')" id="tab-orders" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-md font-semibold transition">Orders</button>
+            <button onclick="switchTab('settings')" id="tab-settings" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-md font-semibold transition">Settings</button>
+        </div>
+
+        <!-- PRODUCTS TAB -->
+        <div id="products-view" class="bg-white p-6 rounded-lg shadow-md block">
+            <h2 class="text-xl font-bold mb-4">Manage Products</h2>
+            
+            <form id="add-product-form" class="bg-gray-50 p-4 rounded-md border border-gray-200 mb-6">
+                <input type="hidden" id="edit-id" value="">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <input type="text" id="name" placeholder="Product Name" required class="w-full p-2 border rounded">
+                    <input type="number" id="price" placeholder="Base Price (৳)" required class="w-full p-2 border rounded">
+                    <input type="text" id="image_url" placeholder="Image URL" required class="w-full p-2 border rounded">
+                    <div class="w-full">
+                        <input type="text" id="packages" placeholder="Packages (e.g., 30:300, 50:500, 100:900)" class="w-full p-2 border rounded border-blue-400">
+                        <p class="text-xs text-gray-500 mt-1">Format: Quantity:TotalPrice, Quantity:TotalPrice</p>
+                    </div>
+                </div>
+                <textarea id="description" placeholder="Product Description" rows="3" required class="w-full p-2 border rounded mb-4"></textarea>
+                <div class="flex gap-2">
+                    <button type="submit" id="submit-btn" class="bg-green-600 text-white px-6 py-2 rounded font-bold hover:bg-green-700">Add Product</button>
+                    <button type="button" id="cancel-btn" onclick="cancelEdit()" class="hidden bg-gray-500 text-white px-6 py-2 rounded font-bold hover:bg-gray-600">Cancel</button>
+                </div>
+            </form>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b-2 border-gray-200 bg-gray-50">
+                            <th class="p-3">Image</th>
+                            <th class="p-3">Name</th>
+                            <th class="p-3">Base Price</th>
+                            <th class="p-3">Packages</th>
+                            <th class="p-3">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="products-list">
+                        <!-- Products load here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ORDERS TAB -->
+        <div id="orders-view" class="bg-white p-6 rounded-lg shadow-md hidden">
+            <h2 class="text-xl font-bold mb-4">Customer Orders</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b-2 border-gray-200 bg-gray-50">
+                            <th class="p-3">ID</th>
+                            <th class="p-3">Customer</th>
+                            <th class="p-3">Phone</th>
+                            <th class="p-3">Address</th>
+                            <th class="p-3">Product</th>
+                            <th class="p-3">Qty</th>
+                            <th class="p-3">Total</th>
+                            <th class="p-3">Status</th>
+                            <th class="p-3">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orders-list">
+                        <!-- Orders load here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- SETTINGS TAB -->
+        <div id="settings-view" class="bg-white p-6 rounded-lg shadow-md hidden">
+            <h2 class="text-xl font-bold mb-4">Store Settings</h2>
+            
+            <form id="settings-form" class="space-y-4 max-w-lg">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">WhatsApp Number</label>
+                    <input type="text" id="whatsapp_number" placeholder="e.g. 8801700000000" class="w-full p-2 border rounded">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Delivery Charge (৳)</label>
+                    <input type="number" id="delivery_charge" class="w-full p-2 border rounded">
+                </div>
+
+                <div class="pt-4 border-t border-gray-200">
+                    <h3 class="text-lg font-bold mb-2 text-indigo-700">Steadfast Courier Integration</h3>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">API Key</label>
+                    <input type="text" id="steadfast_api" placeholder="Paste your Steadfast API Key here" class="w-full p-2 border rounded mb-3">
+                    
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Secret Key</label>
+                    <input type="password" id="steadfast_secret" placeholder="Paste your Steadfast Secret Key here" class="w-full p-2 border rounded">
+                </div>
+
+                <button type="submit" class="w-full bg-blue-600 text-white px-4 py-2 rounded font-bold hover:bg-blue-700 mt-4">Save Settings</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // --- YOUR ACTUAL SUPABASE KEYS ARE HERE ---
+        const SUPABASE_URL = 'https://frifscjexvqhtptiwear.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_BQFducZtr7aIkYW4G8t7VA_p77ORs24';
+        
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let settings = { id: 1, whatsapp_number: '', delivery_charge: 150, steadfast_api_key: '', steadfast_secret_key: '' };
+
+        // --- TAB LOGIC ---
+        function switchTab(tabId) {
+            document.getElementById('products-view').classList.add('hidden');
+            document.getElementById('orders-view').classList.add('hidden');
+            document.getElementById('settings-view').classList.add('hidden');
+            document.getElementById('tab-products').className = 'px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-md font-semibold transition';
+            document.getElementById('tab-orders').className = 'px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-md font-semibold transition';
+            document.getElementById('tab-settings').className = 'px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-md font-semibold transition';
+
+            document.getElementById(tabId + '-view').classList.remove('hidden');
+            document.getElementById('tab-' + tabId).className = 'px-4 py-2 bg-blue-600 text-white rounded-md font-semibold transition';
+            
+            if(tabId === 'products') loadProducts();
+            if(tabId === 'orders') loadOrders();
+            if(tabId === 'settings') loadSettings();
+        }
+
+        // --- SETTINGS LOGIC ---
+        async function loadSettings() {
+            const { data, error } = await supabaseClient.from('store_settings').select('*').eq('id', 1).single();
+            if (data) {
+                settings = data;
+                document.getElementById('whatsapp_number').value = data.whatsapp_number || '';
+                document.getElementById('delivery_charge').value = data.delivery_charge || 150;
+                document.getElementById('steadfast_api').value = data.steadfast_api_key || '';
+                document.getElementById('steadfast_secret').value = data.steadfast_secret_key || '';
+            }
+        }
+
+        document.getElementById('settings-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                id: 1,
+                whatsapp_number: document.getElementById('whatsapp_number').value,
+                delivery_charge: document.getElementById('delivery_charge').value,
+                steadfast_api_key: document.getElementById('steadfast_api').value,
+                steadfast_secret_key: document.getElementById('steadfast_secret').value
+            };
+
+            const { error } = await supabaseClient.from('store_settings').upsert(payload);
+            
+            if (error) {
+                alert("Error saving settings: " + error.message);
+            } else {
+                alert("✅ Settings Saved Successfully!");
+                settings = payload;
+            }
+        });
+
+        // --- PRODUCTS LOGIC ---
+        async function loadProducts() {
+            const { data: products, error } = await supabaseClient.from('products').select('*').order('created_at', { ascending: false });
+            if (error) return console.error(error);
+
+            const tbody = document.getElementById('products-list');
+            tbody.innerHTML = '';
+
+            products.forEach(p => {
+                const tr = document.createElement('tr');
+                tr.className = 'border-b border-gray-100 hover:bg-gray-50';
+                tr.innerHTML = `
+                    <td class="p-3"><img src="${p.image_urls ? p.image_urls[0] : ''}" class="w-12 h-12 object-cover rounded"></td>
+                    <td class="p-3 font-medium">${p.name}</td>
+                    <td class="p-3">৳${p.price}</td>
+                    <td class="p-3 text-sm text-blue-600">${p.unit_type || '-'}</td>
+                    <td class="p-3">
+                        <button onclick='editProduct(${JSON.stringify(p).replace(/'/g, "&#39;")})' class="text-blue-500 hover:underline mr-3">Edit</button>
+                        <button onclick="deleteProduct(${p.id})" class="text-red-500 hover:underline">Delete</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function editProduct(p) {
+            document.getElementById('edit-id').value = p.id;
+            document.getElementById('name').value = p.name;
+            document.getElementById('price').value = p.price;
+            document.getElementById('image_url').value = p.image_urls[0];
+            document.getElementById('description').value = p.description;
+            document.getElementById('packages').value = p.unit_type || '';
+            
+            document.getElementById('submit-btn').textContent = 'Update Product';
+            document.getElementById('submit-btn').classList.replace('bg-green-600', 'bg-blue-600');
+            document.getElementById('cancel-btn').classList.remove('hidden');
+            window.scrollTo(0,0);
+        }
+
+        function cancelEdit() {
+            document.getElementById('add-product-form').reset();
+            document.getElementById('edit-id').value = '';
+            document.getElementById('submit-btn').textContent = 'Add Product';
+            document.getElementById('submit-btn').classList.replace('bg-blue-600', 'bg-green-600');
+            document.getElementById('cancel-btn').classList.add('hidden');
+        }
+
+        async function deleteProduct(id) {
+            if(confirm("Are you sure you want to delete this product?")) {
+                const { error } = await supabaseClient.from('products').delete().eq('id', id);
+                if(error) alert("Error: " + error.message);
+                else loadProducts();
+            }
+        }
+
+        document.getElementById('add-product-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('edit-id').value;
+            const product = {
+                name: document.getElementById('name').value,
+                price: parseFloat(document.getElementById('price').value),
+                image_urls: [document.getElementById('image_url').value],
+                description: document.getElementById('description').value,
+                unit_type: document.getElementById('packages').value // Saves Volume Discount strings
+            };
+
+            let error;
+            if (id) {
+                const res = await supabaseClient.from('products').update(product).eq('id', id);
+                error = res.error;
+            } else {
+                const res = await supabaseClient.from('products').insert([product]);
+                error = res.error;
+            }
+
+            if (error) alert('Error: ' + error.message);
+            else {
+                cancelEdit();
+                loadProducts();
+            }
+        });
+
+        // --- ORDERS LOGIC ---
+        async function loadOrders() {
+            const { data: orders, error } = await supabaseClient.from('orders').select('*').order('created_at', { ascending: false });
+            if (error) return console.error(error);
+
+            const tbody = document.getElementById('orders-list');
+            tbody.innerHTML = '';
+
+            orders.forEach(o => {
+                const isSent = o.courier_consignment_id != null;
+                const tr = document.createElement('tr');
+                tr.className = 'border-b border-gray-100 hover:bg-gray-50';
+                tr.innerHTML = `
+                    <td class="p-3 text-sm text-gray-500">#${o.id}</td>
+                    <td class="p-3 font-medium">${o.customer_name}</td>
+                    <td class="p-3">${o.customer_phone}</td>
+                    <td class="p-3 text-sm max-w-xs truncate" title="${o.delivery_address}">${o.delivery_address}</td>
+                    <td class="p-3 text-sm">${o.product_name || 'N/A'}</td>
+                    <td class="p-3 font-bold">${o.quantity || '-'}</td>
+                    <td class="p-3 font-bold text-green-700">৳${o.total_amount}</td>
+                    <td class="p-3">
+                        <span class="px-2 py-1 text-xs rounded-full ${isSent ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800'}">
+                            ${isSent ? 'Sent to Courier' : o.order_status}
+                        </span>
+                    </td>
+                    <td class="p-3">
+                        ${isSent 
+                            ? `<span class="text-xs text-gray-500">ID: ${o.courier_consignment_id}</span>` 
+                            : `<button onclick='sendToSteadfast(${JSON.stringify(o).replace(/'/g, "&#39;")})' class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-3 py-1.5 rounded transition shadow-sm">Send to Steadfast</button>`
+                        }
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // --- THE GENUINE SERVERLESS BACKEND CALL ---
+        async function sendToSteadfast(order) {
+            if (!settings.steadfast_api_key || !settings.steadfast_secret_key) {
+                alert("⚠️ Please save your Steadfast API Keys in the Settings tab first.");
+                return;
+            }
+
+            if (!confirm(`Send this order to Steadfast Courier?`)) return;
+
+            try {
+                // Call the Netlify Serverless Backend
+                const response = await fetch('/.netlify/functions/steadfast', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        api_key: settings.steadfast_api_key,
+                        secret_key: settings.steadfast_secret_key,
+                        order_data: {
+                            invoice: order.id.toString(),
+                            recipient_name: order.customer_name,
+                            recipient_phone: order.customer_phone,
+                            recipient_address: order.delivery_address,
+                            cod_amount: order.total_amount
+                        }
+                    })
+                });
+
+                const result = await response.json();
+
+                if (!response.ok || result.status === 400) {
+                    let errorMessage = result.message || JSON.stringify(result.errors || "Unknown Error");
+                    alert(`❌ Steadfast Refused the Order:\n\n${errorMessage}`);
+                    return;
+                }
+
+                // If successful, save the Tracking ID to the database!
+                const consignment_id = result.consignment?.consignment_id || "SENT_SUCCESS";
+                
+                const { error: dbError } = await supabaseClient.from('orders')
+                    .update({ courier_consignment_id: consignment_id, order_status: 'shipped' })
+                    .eq('id', order.id);
+
+                if (dbError) {
+                    alert("Order sent, but failed to update database: " + dbError.message);
+                } else {
+                    alert("✅ Order successfully sent to Steadfast!");
+                    loadOrders();
+                }
+
+            } catch (err) {
+                alert(`❌ Server Connection Failed:\n\nCould not reach the Netlify backend. Ensure you deployed via GitHub!`);
+                console.error(err);
+            }
+        }
+
+        // Initialize
+        loadProducts();
+        loadSettings();
+    </script>
+</body>
+</html>
