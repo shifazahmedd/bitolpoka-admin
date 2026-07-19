@@ -3,262 +3,277 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bitolpoka Admin</title>
+    <title>Bitolpoka Secure Admin</title>
+    
+    <!-- MAGIC SECURITY FIX: Automatically forces HTTPS padlock -->
+    <script>
+        if (window.location.protocol === 'http:' && window.location.hostname !== 'localhost') {
+            window.location.href = window.location.href.replace('http:', 'https:');
+        }
+    </script>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="bg-gray-100 text-gray-800 font-sans p-6 min-h-screen">
+<body class="bg-gray-100 text-gray-800 font-sans h-screen flex flex-col">
 
-    <!-- 🔒 LOGIN SCREEN -->
-    <div id="login-view" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
-        <div class="bg-white p-8 rounded-lg shadow-2xl max-w-md w-full">
-            <h2 class="text-3xl font-bold mb-2 text-center text-gray-800">Bitolpoka</h2>
-            <p class="text-center text-gray-500 mb-6">Secure Admin Login</p>
+    <!-- LOGIN SCREEN -->
+    <div id="login-view" class="flex-1 flex items-center justify-center p-6">
+        <div class="bg-white p-8 rounded-xl shadow-xl w-full max-w-md border border-gray-200">
+            <div class="flex justify-center mb-6">
+                <div class="w-12 h-12 rounded-lg bg-green-700 flex items-center justify-center shadow-sm">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V12"/><path d="M12 12C12 7 8 5 4 5c0 5 3 8 8 8"/><path d="M12 12c0-5 4-7 8-7 0 5-3 8-8 8"/></svg>
+                </div>
+            </div>
+            <h1 class="text-2xl font-extrabold text-center text-gray-900 mb-2">Bitolpoka Admin</h1>
+            <p class="text-center text-gray-500 mb-6 text-sm">Please sign in to access your business data.</p>
+            
             <form id="login-form" class="space-y-4">
                 <div>
                     <label class="block text-sm font-bold text-gray-700 mb-1">Email</label>
-                    <input type="email" id="login-email" required class="w-full p-3 border rounded-md focus:ring focus:ring-blue-200">
+                    <input type="email" id="email" required class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-green-600 outline-none transition">
                 </div>
                 <div>
                     <label class="block text-sm font-bold text-gray-700 mb-1">Password</label>
-                    <input type="password" id="login-password" required class="w-full p-3 border rounded-md focus:ring focus:ring-blue-200">
+                    <input type="password" id="password" required class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-green-600 outline-none transition">
                 </div>
-                <button type="submit" id="login-btn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-md hover:bg-blue-700 transition">Log In</button>
-                <p id="login-error" class="text-red-500 text-sm text-center font-semibold mt-2 hidden"></p>
+                <button type="submit" id="login-btn" class="w-full bg-green-700 hover:bg-green-800 text-white font-bold py-2.5 rounded-lg transition shadow-md flex justify-center items-center gap-2">
+                    <span id="login-spinner" class="hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    <span>Sign In</span>
+                </button>
             </form>
         </div>
     </div>
 
-    <!-- 🚀 MAIN ADMIN APP (Hidden until logged in) -->
-    <div id="app-view" class="max-w-6xl mx-auto hidden">
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-3xl font-bold text-gray-800">Bitolpoka Admin</h1>
-            <button onclick="logOut()" class="px-4 py-2 bg-red-100 text-red-600 hover:bg-red-200 font-bold rounded shadow-sm transition">Log Out</button>
-        </div>
-
-        <div class="flex flex-wrap gap-2 mb-6 border-b border-gray-300 pb-2">
-            <button onclick="switchTab('dashboard')" id="tab-dashboard" class="px-4 py-2 bg-blue-600 text-white rounded-md font-semibold transition">Dashboard</button>
-            <button onclick="switchTab('orders')" id="tab-orders" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-md font-semibold transition">Orders</button>
-            <button onclick="switchTab('products')" id="tab-products" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-md font-semibold transition">Products</button>
-            <button onclick="switchTab('settings')" id="tab-settings" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-md font-semibold transition">Settings</button>
-        </div>
-
-        <!-- 📈 DASHBOARD TAB -->
-        <div id="dashboard-view" class="block space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-green-500">
-                    <h3 class="text-gray-500 text-sm font-bold uppercase tracking-wider mb-1">Total Revenue</h3>
-                    <p id="dash-revenue" class="text-4xl font-bold text-gray-800">৳0</p>
-                </div>
-                <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-yellow-500">
-                    <h3 class="text-gray-500 text-sm font-bold uppercase tracking-wider mb-1">Pending Orders</h3>
-                    <p id="dash-pending" class="text-4xl font-bold text-gray-800">0</p>
-                </div>
-                <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-blue-500">
-                    <h3 class="text-gray-500 text-sm font-bold uppercase tracking-wider mb-1">Best Selling Product</h3>
-                    <p id="dash-bestseller" class="text-2xl font-bold text-blue-600 truncate">Loading...</p>
-                </div>
+    <!-- DASHBOARD (Hidden until logged in) -->
+    <div id="dashboard-view" class="hidden flex-1 overflow-y-auto p-6">
+        <div class="max-w-6xl mx-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Bitolpoka Admin</h1>
+                <button onclick="logout()" class="text-sm font-bold text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100 px-4 py-2 rounded-lg transition">Sign Out</button>
             </div>
-        </div>
 
-        <!-- ⚡ ORDERS TAB (With Search & Bulk Actions) -->
-        <div id="orders-view" class="bg-white p-6 rounded-lg shadow-md hidden">
-            <div class="flex flex-col lg:flex-row justify-between items-center mb-6 gap-4">
-                <div class="flex flex-wrap items-center gap-2">
-                    <button id="bulk-send-btn" onclick="bulkSendToSteadfast()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded font-bold shadow-sm transition hidden">📦 Bulk Send</button>
-                    <button id="bulk-mark-btn" onclick="bulkMarkAsSent()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-bold shadow-sm transition hidden">✅ Mark as Sent</button>
-                    <button id="trash-toggle-btn" onclick="toggleTrash()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded font-bold shadow-sm transition">🗑️ View Trash</button>
-                </div>
-                <div class="relative w-full lg:w-72">
-                    <input type="text" id="order-search" onkeyup="renderOrders()" placeholder="🔍 Search Name or Phone..." class="w-full p-2 pl-8 border rounded-lg bg-gray-50 focus:ring focus:ring-blue-200">
+            <!-- Navigation Tabs -->
+            <div class="flex space-x-3 mb-6 border-b border-gray-300 pb-2">
+                <button onclick="switchTab('orders')" id="tab-orders" class="px-5 py-2.5 bg-blue-600 text-white rounded-lg font-bold transition shadow-sm">Orders</button>
+                <button onclick="switchTab('products')" id="tab-products" class="px-5 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-bold transition">Products</button>
+                <button onclick="switchTab('settings')" id="tab-settings" class="px-5 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-bold transition">Settings</button>
+            </div>
+
+            <!-- ORDERS TAB -->
+            <div id="orders-view" class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 block">
+                <h2 class="text-xl font-bold mb-4 text-gray-900">Customer Orders</h2>
+                <div class="overflow-x-auto rounded-lg border border-gray-200">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-gray-200 bg-gray-50 text-gray-600 text-sm uppercase tracking-wider">
+                                <th class="p-4 font-bold">ID</th>
+                                <th class="p-4 font-bold">Customer</th>
+                                <th class="p-4 font-bold">Phone</th>
+                                <th class="p-4 font-bold">Address</th>
+                                <th class="p-4 font-bold">Product</th>
+                                <th class="p-4 font-bold">Qty</th>
+                                <th class="p-4 font-bold">Total</th>
+                                <th class="p-4 font-bold">Status</th>
+                                <th class="p-4 font-bold">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-list" class="divide-y divide-gray-100">
+                            <!-- Orders load here -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse min-w-[800px]">
-                    <thead>
-                        <tr class="border-b-2 border-gray-200 bg-gray-50">
-                            <th class="p-3 w-10"><input type="checkbox" id="selectAll" onclick="toggleSelectAll()" class="w-4 h-4 cursor-pointer"></th>
-                            <th class="p-3">ID</th>
-                            <th class="p-3">Customer</th>
-                            <th class="p-3">Phone</th>
-                            <th class="p-3">Product</th>
-                            <th class="p-3">Qty</th>
-                            <th class="p-3">Total</th>
-                            <th class="p-3">Status</th>
-                            <th class="p-3">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="orders-list">
-                        <!-- Orders load here -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- 🛒 PRODUCTS TAB -->
-        <div id="products-view" class="bg-white p-6 rounded-lg shadow-md hidden">
-            <h2 class="text-xl font-bold mb-4">Manage Products</h2>
-            
-            <form id="add-product-form" class="bg-gray-50 p-4 rounded-md border border-gray-200 mb-6">
-                <input type="hidden" id="edit-id" value="">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <input type="text" id="name" placeholder="Product Name" required class="w-full p-2 border rounded">
-                    <input type="number" id="price" placeholder="Base Price (৳)" required class="w-full p-2 border rounded">
-                    <input type="text" id="image_url" placeholder="Image URL" required class="w-full p-2 border rounded">
-                    
-                    <div class="flex flex-col sm:flex-row gap-2">
-                        <select id="unit_type" class="p-2 border rounded bg-white w-full sm:w-1/3">
-                            <option value="pcs">Pcs</option>
-                            <option value="box">Box</option>
-                            <option value="kg">Kg</option>
-                        </select>
-                        <div class="w-full sm:w-2/3 border rounded bg-white p-2">
-                            <label class="text-xs font-bold text-gray-500 mb-1 block">Dynamic Packages (e.g. 30 for 400)</label>
-                            <div id="package-list" class="space-y-2 mb-2"></div>
-                            <button type="button" onclick="addPackageRow()" class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded font-bold hover:bg-blue-200">+ Add Package Size</button>
+            <!-- PRODUCTS TAB -->
+            <div id="products-view" class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hidden">
+                <h2 class="text-xl font-bold mb-4 text-gray-900">Manage Products</h2>
+                
+                <form id="add-product-form" class="bg-gray-50 p-5 rounded-xl border border-gray-200 mb-6">
+                    <input type="hidden" id="edit-id" value="">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <input type="text" id="name" placeholder="Product Name" required class="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-600">
+                        <input type="number" id="price" placeholder="Base Price (৳)" required class="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-600">
+                        <input type="text" id="image_url" placeholder="Image URL" required class="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-600">
+                        <div class="w-full">
+                            <input type="text" id="packages" placeholder="Packages (e.g., 30:300, 50:500)" class="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-600">
+                            <p class="text-xs text-gray-500 mt-1.5 font-medium">Format: Quantity:TotalPrice, Quantity:TotalPrice</p>
                         </div>
                     </div>
-                </div>
-                <textarea id="description" placeholder="Product Description" rows="2" required class="w-full p-2 border rounded mb-4"></textarea>
-                <div class="flex gap-2">
-                    <button type="submit" id="submit-btn" class="bg-green-600 text-white px-6 py-2 rounded font-bold hover:bg-green-700">Save Product</button>
-                    <button type="button" id="cancel-btn" onclick="cancelEdit()" class="hidden bg-gray-500 text-white px-6 py-2 rounded font-bold hover:bg-gray-600">Cancel</button>
-                </div>
-            </form>
+                    <textarea id="description" placeholder="Product Description" rows="3" required class="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-600 mb-4 resize-none"></textarea>
+                    <div class="flex gap-3">
+                        <button type="submit" id="submit-btn" class="bg-green-600 text-white px-6 py-2.5 rounded-lg font-bold hover:bg-green-700 transition">Add Product</button>
+                        <button type="button" id="cancel-btn" onclick="cancelEdit()" class="hidden bg-gray-500 text-white px-6 py-2.5 rounded-lg font-bold hover:bg-gray-600 transition">Cancel</button>
+                    </div>
+                </form>
 
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse min-w-[600px]">
-                    <thead>
-                        <tr class="border-b border-gray-200 bg-gray-50">
-                            <th class="p-3">Image</th>
-                            <th class="p-3">Name</th>
-                            <th class="p-3">Base Price</th>
-                            <th class="p-3">Packages</th>
-                            <th class="p-3">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="products-list"></tbody>
-                </table>
+                <div class="overflow-x-auto rounded-lg border border-gray-200">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-gray-200 bg-gray-50 text-gray-600 text-sm uppercase tracking-wider">
+                                <th class="p-4 font-bold">Image</th>
+                                <th class="p-4 font-bold">Name</th>
+                                <th class="p-4 font-bold">Base Price</th>
+                                <th class="p-4 font-bold">Packages</th>
+                                <th class="p-4 font-bold">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="products-list" class="divide-y divide-gray-100">
+                            <!-- Products load here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- SETTINGS TAB -->
+            <div id="settings-view" class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hidden">
+                <h2 class="text-xl font-bold mb-4 text-gray-900">Store Settings</h2>
+                
+                <form id="settings-form" class="space-y-5 max-w-lg">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1.5">WhatsApp Number</label>
+                        <input type="text" id="whatsapp_number" placeholder="e.g. 8801700000000" class="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-600">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Delivery Charge (৳)</label>
+                        <input type="number" id="delivery_charge" class="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-600">
+                    </div>
+
+                    <div class="pt-5 border-t border-gray-200 mt-2">
+                        <h3 class="text-lg font-bold mb-3 text-indigo-700">Steadfast Courier Integration</h3>
+                        <label class="block text-sm font-bold text-gray-700 mb-1.5">API Key</label>
+                        <input type="text" id="steadfast_api" placeholder="Paste your Steadfast API Key here" class="w-full p-2.5 border border-gray-300 rounded-lg mb-4 outline-none focus:ring-2 focus:ring-indigo-600">
+                        
+                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Secret Key</label>
+                        <input type="password" id="steadfast_secret" placeholder="Paste your Steadfast Secret Key here" class="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-600">
+                    </div>
+
+                    <button type="submit" class="w-full bg-blue-600 text-white px-4 py-3 rounded-lg font-bold hover:bg-blue-700 mt-2 transition shadow-sm">Save Settings</button>
+                </form>
             </div>
         </div>
+    </div>
 
-        <!-- ⚙️ SETTINGS TAB -->
-        <div id="settings-view" class="bg-white p-6 rounded-lg shadow-md hidden">
-            <h2 class="text-xl font-bold mb-4">Store Settings</h2>
-            <form id="settings-form" class="space-y-4 max-w-lg">
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">WhatsApp Number</label>
-                    <input type="text" id="whatsapp_number" placeholder="e.g. 8801700000000" class="w-full p-2 border rounded">
-                </div>
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">Delivery Charge (৳)</label>
-                    <input type="number" id="delivery_charge" class="w-full p-2 border rounded">
-                </div>
-                <div class="pt-4 border-t border-gray-200">
-                    <h3 class="text-lg font-bold mb-2 text-indigo-700">Steadfast Courier Integration</h3>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">API Key</label>
-                    <input type="text" id="steadfast_api" placeholder="Paste your Steadfast API Key here" class="w-full p-2 border rounded mb-3">
-                    <label class="block text-sm font-bold text-gray-700 mb-1">Secret Key</label>
-                    <input type="password" id="steadfast_secret" placeholder="Paste your Steadfast Secret Key here" class="w-full p-2 border rounded">
-                </div>
-                <button type="submit" class="w-full bg-blue-600 text-white px-4 py-2 rounded font-bold hover:bg-blue-700 mt-4">Save Settings</button>
-            </form>
+    <!-- CUSTOM MODAL UI (Replaces standard alerts) -->
+    <div id="custom-modal" class="fixed inset-0 bg-gray-900 bg-opacity-60 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 transition-opacity">
+        <div class="bg-white rounded-xl shadow-2xl max-w-sm w-full p-6 transform transition-all">
+            <h3 id="modal-title" class="text-xl font-extrabold text-gray-900 mb-2">Notice</h3>
+            <p id="modal-message" class="text-gray-600 mb-6 font-medium leading-relaxed"></p>
+            <div class="flex justify-end gap-3">
+                <button id="modal-cancel" class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg font-bold transition hidden">Cancel</button>
+                <button id="modal-confirm" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold transition shadow-sm">OK</button>
+            </div>
         </div>
     </div>
 
     <script>
+        // --- YOUR ACTUAL SUPABASE KEYS ARE HERE ---
         const SUPABASE_URL = 'https://frifscjexvqhtptiwear.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_BQFducZtr7aIkYW4G8t7VA_p77ORs24';
+        
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let settings = { id: 1, whatsapp_number: '', delivery_charge: 150, steadfast_api_key: '', steadfast_secret_key: '' };
-        let allOrders = [];
 
-        // --- AUTH LOGIC ---
+        // --- AUTHENTICATION LOGIC ---
         async function checkSession() {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) {
                 document.getElementById('login-view').classList.add('hidden');
-                document.getElementById('app-view').classList.remove('hidden');
-                initApp();
+                document.getElementById('dashboard-view').classList.remove('hidden');
+                document.getElementById('dashboard-view').classList.add('flex');
+                initDashboard();
             } else {
                 document.getElementById('login-view').classList.remove('hidden');
-                document.getElementById('app-view').classList.add('hidden');
+                document.getElementById('dashboard-view').classList.add('hidden');
+                document.getElementById('dashboard-view').classList.remove('flex');
             }
         }
 
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const btn = document.getElementById('login-btn');
-            const err = document.getElementById('login-error');
-            btn.innerHTML = "Authenticating...";
-            btn.disabled = true;
+            const spinner = document.getElementById('login-spinner');
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
             
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-            
-            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-            
+            spinner.classList.remove('hidden');
+            const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+            spinner.classList.add('hidden');
+
             if (error) {
-                err.innerText = "Incorrect Email or Password.";
-                err.classList.remove('hidden');
-                btn.innerHTML = "Log In";
-                btn.disabled = false;
+                showModal('Login Failed', error.message);
             } else {
-                err.classList.add('hidden');
                 checkSession();
             }
         });
 
-        async function logOut() {
+        async function logout() {
             await supabaseClient.auth.signOut();
-            location.reload(); 
+            checkSession();
         }
 
-        function initApp() {
-            loadSettings();
-            loadProducts();
-            loadOrders();
+        // --- CUSTOM MODAL SYSTEM ---
+        function showModal(title, message, isConfirm = false, onConfirm = null) {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-message').textContent = message;
+            
+            const cancelBtn = document.getElementById('modal-cancel');
+            const confirmBtn = document.getElementById('modal-confirm');
+            
+            // Clean previous listeners by replacing node
+            const newConfirmBtn = confirmBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+            const newCancelBtn = cancelBtn.cloneNode(true);
+            cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+
+            document.getElementById('custom-modal').classList.remove('hidden');
+
+            if (isConfirm) {
+                newCancelBtn.classList.remove('hidden');
+                newCancelBtn.onclick = closeModal;
+                newConfirmBtn.onclick = () => {
+                    closeModal();
+                    if(onConfirm) onConfirm();
+                };
+            } else {
+                newCancelBtn.classList.add('hidden');
+                newConfirmBtn.onclick = closeModal;
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('custom-modal').classList.add('hidden');
         }
 
         // --- TAB LOGIC ---
         function switchTab(tabId) {
-            ['dashboard', 'products', 'orders', 'settings'].forEach(id => {
-                document.getElementById(id + '-view').classList.add('hidden');
-                document.getElementById('tab-' + id).className = 'px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-md font-semibold transition';
-            });
+            document.getElementById('products-view').classList.add('hidden');
+            document.getElementById('orders-view').classList.add('hidden');
+            document.getElementById('settings-view').classList.add('hidden');
+            
+            const defaultTabClass = 'px-5 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-bold transition';
+            document.getElementById('tab-products').className = defaultTabClass;
+            document.getElementById('tab-orders').className = defaultTabClass;
+            document.getElementById('tab-settings').className = defaultTabClass;
+
             document.getElementById(tabId + '-view').classList.remove('hidden');
-            document.getElementById('tab-' + tabId).className = 'px-4 py-2 bg-blue-600 text-white rounded-md font-semibold transition';
+            document.getElementById('tab-' + tabId).className = 'px-5 py-2.5 bg-blue-600 text-white rounded-lg font-bold transition shadow-sm';
+            
+            if(tabId === 'products') loadProducts();
+            if(tabId === 'orders') loadOrders();
+            if(tabId === 'settings') loadSettings();
         }
 
-        // --- DASHBOARD LOGIC ---
-        function updateDashboard() {
-            const activeOrders = allOrders.filter(o => !o.is_deleted);
-            
-            const revenue = activeOrders.reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0);
-            document.getElementById('dash-revenue').innerText = `৳${revenue}`;
-
-            const pending = activeOrders.filter(o => !o.courier_consignment_id).length;
-            document.getElementById('dash-pending').innerText = pending;
-
-            const counts = {};
-            activeOrders.forEach(o => {
-                if(o.product_name) {
-                    counts[o.product_name] = (counts[o.product_name] || 0) + (Number(o.quantity) || 1);
-                }
-            });
-            let bestName = "None Yet";
-            let maxCount = 0;
-            for (const [name, qty] of Object.entries(counts)) {
-                if (qty > maxCount) { maxCount = qty; bestName = name; }
-            }
-            document.getElementById('dash-bestseller').innerText = bestName;
+        // --- INITIALIZE DASHBOARD ---
+        function initDashboard() {
+            switchTab('orders'); // Load orders by default
+            loadSettings();
         }
 
         // --- SETTINGS LOGIC ---
         async function loadSettings() {
-            const { data } = await supabaseClient.from('store_settings').select('*').eq('id', 1).single();
+            const { data, error } = await supabaseClient.from('store_settings').select('*').eq('id', 1).single();
             if (data) {
                 settings = data;
                 document.getElementById('whatsapp_number').value = data.whatsapp_number || '';
@@ -267,6 +282,7 @@
                 document.getElementById('steadfast_secret').value = data.steadfast_secret_key || '';
             }
         }
+
         document.getElementById('settings-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const payload = {
@@ -276,42 +292,39 @@
                 steadfast_api_key: document.getElementById('steadfast_api').value,
                 steadfast_secret_key: document.getElementById('steadfast_secret').value
             };
-            await supabaseClient.from('store_settings').upsert(payload);
-            alert("✅ Settings Saved Successfully!");
-            settings = payload;
+
+            const { error } = await supabaseClient.from('store_settings').upsert(payload);
+            
+            if (error) {
+                showModal("Error", "Error saving settings: " + error.message);
+            } else {
+                showModal("Success", "Settings Saved Successfully!");
+                settings = payload;
+            }
         });
 
         // --- PRODUCTS LOGIC ---
-        function addPackageRow(qty = '', price = '') {
-            const div = document.createElement('div');
-            div.className = 'flex gap-2 package-row';
-            div.innerHTML = `
-                <input type="number" placeholder="Qty" value="${qty}" class="w-1/2 p-1 border rounded text-sm package-qty">
-                <input type="number" placeholder="Price (৳)" value="${price}" class="w-1/2 p-1 border rounded text-sm package-price">
-                <button type="button" onclick="this.parentElement.remove()" class="text-red-500 font-bold hover:bg-red-50 px-2 rounded">✕</button>
-            `;
-            document.getElementById('package-list').appendChild(div);
-        }
-
         async function loadProducts() {
-            const { data: products } = await supabaseClient.from('products').select('*').order('created_at', { ascending: false });
+            const { data: products, error } = await supabaseClient.from('products').select('*').order('created_at', { ascending: false });
+            if (error) return console.error(error);
+
             const tbody = document.getElementById('products-list');
             tbody.innerHTML = '';
+
             products.forEach(p => {
-                let pkgString = p.packages || p.unit_type; 
-                if(pkgString && !pkgString.includes(':')) pkgString = ''; 
-                
-                tbody.innerHTML += `
-                    <tr class="border-b border-gray-100 hover:bg-gray-50">
-                        <td class="p-3"><img src="${p.image_urls ? p.image_urls[0] : ''}" class="w-12 h-12 object-cover rounded"></td>
-                        <td class="p-3 font-medium">${p.name}</td>
-                        <td class="p-3">৳${p.price}</td>
-                        <td class="p-3 text-xs text-blue-600 max-w-xs truncate">${pkgString}</td>
-                        <td class="p-3">
-                            <button onclick='editProduct(${JSON.stringify(p).replace(/'/g, "&#39;")})' class="text-blue-500 hover:underline mr-3 font-bold">Edit</button>
-                        </td>
-                    </tr>
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-50';
+                tr.innerHTML = `
+                    <td class="p-4"><img src="${p.image_urls ? p.image_urls[0] : ''}" class="w-12 h-12 object-cover rounded-md shadow-sm border border-gray-200"></td>
+                    <td class="p-4 font-bold text-gray-900">${p.name}</td>
+                    <td class="p-4 font-medium text-gray-700">৳${p.price}</td>
+                    <td class="p-4 text-sm text-blue-600 font-medium">${p.unit_type || '-'}</td>
+                    <td class="p-4">
+                        <button onclick='editProduct(${JSON.stringify(p).replace(/'/g, "&#39;")})' class="text-blue-600 font-bold hover:underline mr-4">Edit</button>
+                        <button onclick="deleteProduct(${p.id})" class="text-red-500 font-bold hover:underline">Delete</button>
+                    </td>
                 `;
+                tbody.appendChild(tr);
             });
         }
 
@@ -321,283 +334,148 @@
             document.getElementById('price').value = p.price;
             document.getElementById('image_url').value = p.image_urls[0];
             document.getElementById('description').value = p.description;
-            
-            let rawUnit = p.unit_type || 'pcs';
-            if(rawUnit.includes(':')) document.getElementById('unit_type').value = 'box'; 
-            else document.getElementById('unit_type').value = rawUnit;
-            
-            document.getElementById('package-list').innerHTML = '';
-            const pkgData = p.packages || (p.unit_type && p.unit_type.includes(':') ? p.unit_type : '');
-            if(pkgData) {
-                pkgData.split(',').forEach(pair => {
-                    const [qty, price] = pair.split(':');
-                    if(qty && price) addPackageRow(qty.trim(), price.trim());
-                });
-            } else { addPackageRow(); }
+            document.getElementById('packages').value = p.unit_type || '';
             
             document.getElementById('submit-btn').textContent = 'Update Product';
             document.getElementById('submit-btn').classList.replace('bg-green-600', 'bg-blue-600');
             document.getElementById('cancel-btn').classList.remove('hidden');
-            switchTab('products');
             window.scrollTo(0,0);
         }
 
         function cancelEdit() {
             document.getElementById('add-product-form').reset();
             document.getElementById('edit-id').value = '';
-            document.getElementById('package-list').innerHTML = '';
-            document.getElementById('submit-btn').textContent = 'Save Product';
+            document.getElementById('submit-btn').textContent = 'Add Product';
             document.getElementById('submit-btn').classList.replace('bg-blue-600', 'bg-green-600');
             document.getElementById('cancel-btn').classList.add('hidden');
+        }
+
+        function deleteProduct(id) {
+            showModal("Confirm Delete", "Are you sure you want to delete this product?", true, async () => {
+                const { error } = await supabaseClient.from('products').delete().eq('id', id);
+                if(error) showModal("Error", error.message);
+                else loadProducts();
+            });
         }
 
         document.getElementById('add-product-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const id = document.getElementById('edit-id').value;
-            
-            let pkgArr = [];
-            document.querySelectorAll('.package-row').forEach(row => {
-                let q = row.querySelector('.package-qty').value;
-                let p = row.querySelector('.package-price').value;
-                if(q && p) pkgArr.push(`${q}:${p}`);
-            });
-
             const product = {
                 name: document.getElementById('name').value,
                 price: parseFloat(document.getElementById('price').value),
                 image_urls: [document.getElementById('image_url').value],
                 description: document.getElementById('description').value,
-                unit_type: document.getElementById('unit_type').value,
-                packages: pkgArr.join(', ')
+                unit_type: document.getElementById('packages').value 
             };
 
-            if (id) await supabaseClient.from('products').update(product).eq('id', id);
-            else await supabaseClient.from('products').insert([product]);
+            let error;
+            if (id) {
+                const res = await supabaseClient.from('products').update(product).eq('id', id);
+                error = res.error;
+            } else {
+                const res = await supabaseClient.from('products').insert([product]);
+                error = res.error;
+            }
 
-            cancelEdit();
-            loadProducts();
+            if (error) showModal('Error', error.message);
+            else {
+                cancelEdit();
+                loadProducts();
+            }
         });
 
-        // --- ORDERS LOGIC (Search, Bulk, Trash) ---
-        let showingTrash = false;
-        
-        function toggleTrash() {
-            showingTrash = !showingTrash;
-            const btn = document.getElementById('trash-toggle-btn');
-            if (showingTrash) {
-                btn.innerHTML = '📦 View Active Orders';
-                btn.className = 'bg-blue-100 hover:bg-blue-200 text-blue-800 px-4 py-2 rounded font-bold transition shadow-sm text-sm md:text-base';
-            } else {
-                btn.innerHTML = '🗑️ View Trash';
-                btn.className = 'bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded font-bold shadow-sm transition text-sm md:text-base';
-            }
-            renderOrders();
-        }
-
+        // --- ORDERS LOGIC ---
         async function loadOrders() {
-            const { data } = await supabaseClient.from('orders').select('*').order('created_at', { ascending: false });
-            if (data) {
-                allOrders = data;
-                updateDashboard();
-                renderOrders();
-            }
-        }
+            const { data: orders, error } = await supabaseClient.from('orders').select('*').order('created_at', { ascending: false });
+            if (error) return console.error(error);
 
-        function toggleSelectAll() {
-            const isChecked = document.getElementById('selectAll').checked;
-            const checkboxes = document.querySelectorAll('.order-checkbox');
-            checkboxes.forEach(cb => cb.checked = isChecked);
-            updateBulkButtonVisibility();
-        }
-
-        function updateBulkButtonVisibility() {
-            const checkedCount = document.querySelectorAll('.order-checkbox:checked').length;
-            const bulkBtn = document.getElementById('bulk-send-btn');
-            const markBtn = document.getElementById('bulk-mark-btn');
-            
-            if (checkedCount > 0 && !showingTrash) {
-                bulkBtn.classList.remove('hidden');
-                bulkBtn.innerText = `📦 Send ${checkedCount}`;
-                
-                markBtn.classList.remove('hidden');
-                markBtn.innerText = `✅ Mark ${checkedCount} as Sent`;
-            } else {
-                bulkBtn.classList.add('hidden');
-                markBtn.classList.add('hidden');
-            }
-        }
-
-        function renderOrders() {
             const tbody = document.getElementById('orders-list');
-            const searchTerm = document.getElementById('order-search').value.toLowerCase();
             tbody.innerHTML = '';
 
-            const filtered = allOrders.filter(o => {
-                const isDeleted = o.is_deleted === true; 
-                if (showingTrash !== isDeleted) return false;
-                
-                if (searchTerm) {
-                    const searchStr = `${o.customer_name} ${o.customer_phone} ${o.id}`.toLowerCase();
-                    if (!searchStr.includes(searchTerm)) return false;
-                }
-                return true;
-            });
-
-            document.getElementById('selectAll').checked = false;
-            updateBulkButtonVisibility();
-
-            filtered.forEach(o => {
+            orders.forEach(o => {
                 const isSent = o.courier_consignment_id != null;
                 const tr = document.createElement('tr');
-                tr.className = 'border-b border-gray-100 hover:bg-gray-50';
-                
-                let checkboxHTML = `<input type="checkbox" disabled class="w-4 h-4 cursor-not-allowed opacity-50">`;
-                if (!isSent && !showingTrash) {
-                    checkboxHTML = `<input type="checkbox" value="${o.id}" onchange="updateBulkButtonVisibility()" class="order-checkbox w-4 h-4 cursor-pointer">`;
-                }
-
+                tr.className = 'hover:bg-gray-50';
                 tr.innerHTML = `
-                    <td class="p-3">${checkboxHTML}</td>
-                    <td class="p-3 text-sm text-gray-500">#${o.id}</td>
-                    <td class="p-3 font-medium whitespace-nowrap">${o.customer_name}</td>
-                    <td class="p-3 whitespace-nowrap">${o.customer_phone}</td>
-                    <td class="p-3 text-sm min-w-[150px]">${o.product_name || 'N/A'}</td>
-                    <td class="p-3 font-bold">${o.quantity || '-'}</td>
-                    <td class="p-3 font-bold text-green-700 whitespace-nowrap">৳${o.total_amount}</td>
-                    <td class="p-3">
-                        <span class="px-2 py-1 text-xs rounded-full ${isSent ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800'} whitespace-nowrap">
+                    <td class="p-4 text-sm font-medium text-gray-500">#${o.id}</td>
+                    <td class="p-4 font-bold text-gray-900">${o.customer_name}</td>
+                    <td class="p-4 font-medium text-gray-700">${o.customer_phone}</td>
+                    <td class="p-4 text-sm max-w-xs truncate text-gray-600" title="${o.delivery_address}">${o.delivery_address}</td>
+                    <td class="p-4 text-sm font-medium text-gray-800">${o.product_name || 'N/A'}</td>
+                    <td class="p-4 font-bold text-gray-700">${o.quantity || '-'}</td>
+                    <td class="p-4 font-extrabold text-green-700">৳${o.total_amount}</td>
+                    <td class="p-4">
+                        <span class="px-3 py-1 text-xs font-bold rounded-full ${isSent ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'bg-amber-50 text-amber-700 border border-amber-200'}">
                             ${isSent ? 'Sent to Courier' : o.order_status}
                         </span>
                     </td>
-                    <td class="p-3">
-                        <div class="flex items-center gap-2">
-                            ${showingTrash ? `
-                                <button onclick="restoreOrder(${o.id})" class="bg-green-500 hover:bg-green-600 text-white text-xs font-bold px-3 py-1.5 rounded transition whitespace-nowrap">♻️ Restore</button>
-                                <button onclick="hardDeleteOrder(${o.id})" class="text-red-500 text-lg hover:bg-red-50 px-2 rounded" title="Delete Permanently">❌</button>
-                            ` : `
-                                ${isSent 
-                                    ? `<span class="text-xs text-gray-700 font-bold bg-gray-200 px-2 py-1 rounded shadow-inner whitespace-nowrap">✅ Sent</span>` 
-                                    : `<button id="btn-send-${o.id}" onclick='processSingleSteadfastOrder(${o.id})' class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-3 py-1.5 rounded transition whitespace-nowrap">Send to Steadfast</button>`
-                                }
-                                <button onclick="deleteOrder(${o.id})" class="text-red-500 text-lg hover:bg-red-50 px-2 rounded ml-1" title="Move to Trash">🗑️</button>
-                            `}
-                        </div>
+                    <td class="p-4">
+                        ${isSent 
+                            ? `<span class="text-xs font-mono font-bold text-gray-500 bg-gray-100 px-2 py-1 rounded">ID: ${o.courier_consignment_id}</span>` 
+                            : `<button onclick='sendToSteadfast(${JSON.stringify(o).replace(/'/g, "&#39;")})' class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2 rounded-lg transition shadow-sm">Send to Steadfast</button>`
+                        }
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        async function deleteOrder(id) {
-            await supabaseClient.from('orders').update({ is_deleted: true }).eq('id', id);
-            loadOrders(); 
-        }
-        
-        async function restoreOrder(id) {
-            await supabaseClient.from('orders').update({ is_deleted: false }).eq('id', id);
-            loadOrders(); 
-        }
-        
-        async function hardDeleteOrder(id) {
-            if(confirm("🛑 Are you sure you want to PERMANENTLY delete this order?")) {
-                await supabaseClient.from('orders').delete().eq('id', id);
-                loadOrders();
-            }
-        }
-
-        // --- STEADFAST PROCESSING ---
-        async function bulkMarkAsSent() {
-            const checkboxes = document.querySelectorAll('.order-checkbox:checked');
-            if (checkboxes.length === 0) return;
-            if (!confirm(`Mark ${checkboxes.length} selected orders as Sent? (This will NOT send them to Steadfast, it only hides the button)`)) return;
-
-            const markBtn = document.getElementById('bulk-mark-btn');
-            markBtn.disabled = true;
-            markBtn.innerHTML = "⏳ Updating...";
-
-            for (let box of checkboxes) {
-                const orderId = box.value;
-                await supabaseClient.from('orders')
-                    .update({ courier_consignment_id: 'MANUALLY_MARKED', order_status: 'shipped' })
-                    .eq('id', orderId);
-            }
-            
-            alert("✅ Orders successfully marked as sent!");
-            loadOrders(); 
-        }
-
-        async function bulkSendToSteadfast() {
-            const checkboxes = document.querySelectorAll('.order-checkbox:checked');
-            if (checkboxes.length === 0) return;
-            if (!confirm(`Send ${checkboxes.length} selected orders to Steadfast?`)) return;
-
-            const bulkBtn = document.getElementById('bulk-send-btn');
-            bulkBtn.disabled = true;
-            bulkBtn.innerHTML = "⏳ Processing...";
-
-            for (let box of checkboxes) {
-                await processSingleSteadfastOrder(box.value, true);
-            }
-            
-            alert("✅ Bulk sending complete!");
-            loadOrders();
-        }
-
-        async function processSingleSteadfastOrder(orderId, isBulk = false) {
-            if (!settings.steadfast_api_key) return alert("⚠️ Save Steadfast API keys in Settings first.");
-            
-            if (!isBulk && !confirm(`Send this order to Steadfast?`)) return;
-
-            const order = allOrders.find(o => o.id == orderId);
-            const btn = document.getElementById(`btn-send-${orderId}`);
-            if(btn) {
-                btn.disabled = true;
-                btn.innerHTML = "⏳...";
-                btn.className = "bg-gray-400 text-white text-xs font-bold px-3 py-1.5 rounded cursor-not-allowed whitespace-nowrap";
+        // --- SERVERLESS BACKEND CALL ---
+        function sendToSteadfast(order) {
+            if (!settings.steadfast_api_key || !settings.steadfast_secret_key) {
+                showModal("Missing Credentials", "Please save your Steadfast API Keys in the Settings tab first.");
+                return;
             }
 
-            try {
-                const response = await fetch('/.netlify/functions/steadfast', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        api_key: settings.steadfast_api_key,
-                        secret_key: settings.steadfast_secret_key,
-                        order_data: {
-                            invoice: order.id.toString(),
-                            recipient_name: order.customer_name,
-                            recipient_phone: order.customer_phone,
-                            recipient_address: order.delivery_address,
-                            cod_amount: order.total_amount
-                        }
-                    })
-                });
+            showModal("Confirm Dispatch", `Send order #${order.id} for ${order.customer_name} to Steadfast Courier?`, true, async () => {
+                try {
+                    const response = await fetch('/.netlify/functions/steadfast', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            api_key: settings.steadfast_api_key,
+                            secret_key: settings.steadfast_secret_key,
+                            order_data: {
+                                invoice: order.id.toString(),
+                                recipient_name: order.customer_name,
+                                recipient_phone: order.customer_phone,
+                                recipient_address: order.delivery_address,
+                                cod_amount: order.total_amount
+                            }
+                        })
+                    });
 
-                const result = await response.json();
-                if (!response.ok || result.status === 400 || result.error) {
-                    if(!isBulk) alert(`❌ Steadfast Refused Order #${order.id}:\n${result.error || result.message}`);
-                    if(btn) {
-                        btn.disabled = false;
-                        btn.innerHTML = "Send to Steadfast";
-                        btn.className = "bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-3 py-1.5 rounded whitespace-nowrap";
+                    const result = await response.json();
+
+                    if (!response.ok || result.status === 400) {
+                        let errorMessage = result.message || JSON.stringify(result.errors || "Unknown Error from Steadfast");
+                        showModal("Steadfast Error", errorMessage);
+                        return;
                     }
-                    return;
-                }
 
-                const cid = result.consignment?.consignment_id || "SENT_SUCCESS";
-                await supabaseClient.from('orders').update({ courier_consignment_id: cid, order_status: 'shipped' }).eq('id', order.id);
-                
-                if(!isBulk) {
-                    alert("✅ Order successfully sent!");
-                    loadOrders(); 
+                    const consignment_id = result.consignment?.consignment_id || "SENT_SUCCESS";
+                    
+                    const { error: dbError } = await supabaseClient.from('orders')
+                        .update({ courier_consignment_id: consignment_id, order_status: 'shipped' })
+                        .eq('id', order.id);
+
+                    if (dbError) {
+                        showModal("Database Error", "Order sent, but failed to update local database: " + dbError.message);
+                    } else {
+                        showModal("Success", "Order successfully sent to Steadfast!");
+                        loadOrders();
+                    }
+
+                } catch (err) {
+                    showModal("Connection Failed", "Could not reach the Netlify backend. Make sure your serverless function is uploaded correctly.");
+                    console.error(err);
                 }
-            } catch (err) {
-                if(!isBulk) alert(`❌ Server Error: Could not reach backend.`);
-            }
+            });
         }
 
+        // Run on Page Load
         checkSession();
-
     </script>
 </body>
 </html>
