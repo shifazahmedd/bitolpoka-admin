@@ -45,7 +45,7 @@
         </div>
     </div>
 
-    <!-- DASHBOARD (Hidden until logged in) -->
+    <!-- MAIN DASHBOARD SYSTEM (Hidden until logged in) -->
     <div id="dashboard-view" class="hidden flex-1 overflow-y-auto p-6">
         <div class="max-w-6xl mx-auto">
             <div class="flex justify-between items-center mb-6">
@@ -54,19 +54,53 @@
             </div>
 
             <!-- Navigation Tabs -->
-            <div class="flex space-x-3 mb-6 border-b border-gray-300 pb-2">
-                <button onclick="switchTab('orders')" id="tab-orders" class="px-5 py-2.5 bg-blue-600 text-white rounded-lg font-bold transition shadow-sm">Orders</button>
-                <button onclick="switchTab('products')" id="tab-products" class="px-5 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-bold transition">Products</button>
-                <button onclick="switchTab('settings')" id="tab-settings" class="px-5 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-bold transition">Settings</button>
+            <div class="flex space-x-3 mb-6 border-b border-gray-300 pb-2 overflow-x-auto">
+                <button onclick="switchTab('dashboard')" id="tab-dashboard" class="px-5 py-2.5 bg-blue-600 text-white rounded-lg font-bold transition shadow-sm whitespace-nowrap">Dashboard</button>
+                <button onclick="switchTab('orders')" id="tab-orders" class="px-5 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-bold transition whitespace-nowrap">Orders</button>
+                <button onclick="switchTab('products')" id="tab-products" class="px-5 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-bold transition whitespace-nowrap">Products</button>
+                <button onclick="switchTab('settings')" id="tab-settings" class="px-5 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-bold transition whitespace-nowrap">Settings</button>
             </div>
 
-            <!-- ORDERS TAB -->
-            <div id="orders-view" class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 block">
-                <h2 class="text-xl font-bold mb-4 text-gray-900">Customer Orders</h2>
+            <!-- DASHBOARD ANALYTICS TAB -->
+            <div id="dashboard-tab-view" class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 block">
+                <h2 class="text-xl font-bold mb-5 text-gray-900">Business Analytics</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Total Revenue Card -->
+                    <div class="p-6 bg-blue-50 rounded-xl border border-blue-100 flex flex-col items-center text-center">
+                        <p class="text-sm font-bold text-blue-600 uppercase tracking-wide">Total Revenue</p>
+                        <p class="text-4xl font-extrabold text-gray-900 mt-2" id="stat-revenue">৳0</p>
+                    </div>
+                    <!-- Pending Orders Card -->
+                    <div class="p-6 bg-amber-50 rounded-xl border border-amber-100 flex flex-col items-center text-center">
+                        <p class="text-sm font-bold text-amber-600 uppercase tracking-wide">Pending Orders</p>
+                        <p class="text-4xl font-extrabold text-gray-900 mt-2" id="stat-pending">0</p>
+                    </div>
+                    <!-- Total Lifetime Orders Card -->
+                    <div class="p-6 bg-green-50 rounded-xl border border-green-100 flex flex-col items-center text-center">
+                        <p class="text-sm font-bold text-green-600 uppercase tracking-wide">Total Orders</p>
+                        <p class="text-4xl font-extrabold text-gray-900 mt-2" id="stat-orders">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ORDERS TAB (Customer Page) -->
+            <div id="orders-view" class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hidden">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+                    <h2 class="text-xl font-bold text-gray-900">Customer Orders</h2>
+                    <!-- Dynamic Bulk Send Button -->
+                    <button id="bulk-send-btn" onclick="bulkSendToSteadfast()" class="hidden bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-6 rounded-lg transition shadow-md">
+                        Bulk Send to Steadfast
+                    </button>
+                </div>
+                
                 <div class="overflow-x-auto rounded-lg border border-gray-200">
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="border-b border-gray-200 bg-gray-50 text-gray-600 text-sm uppercase tracking-wider">
+                                <!-- Select All Checkbox -->
+                                <th class="p-4 w-12 text-center">
+                                    <input type="checkbox" id="select-all-orders" onchange="toggleAllOrders(this)" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer">
+                                </th>
                                 <th class="p-4 font-bold">ID</th>
                                 <th class="p-4 font-bold">Customer</th>
                                 <th class="p-4 font-bold">Phone</th>
@@ -75,7 +109,7 @@
                                 <th class="p-4 font-bold">Qty</th>
                                 <th class="p-4 font-bold">Total</th>
                                 <th class="p-4 font-bold">Status</th>
-                                <th class="p-4 font-bold">Action</th>
+                                <th class="p-4 font-bold text-right">Options</th>
                             </tr>
                         </thead>
                         <tbody id="orders-list" class="divide-y divide-gray-100">
@@ -101,8 +135,9 @@
                         </div>
                     </div>
                     <textarea id="description" placeholder="Product Description" rows="3" required class="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-600 mb-4 resize-none"></textarea>
-                    <div class="flex gap-3">
+                    <div class="flex flex-wrap gap-3">
                         <button type="submit" id="submit-btn" class="bg-green-600 text-white px-6 py-2.5 rounded-lg font-bold hover:bg-green-700 transition">Add Product</button>
+                        <button type="button" id="delete-btn" onclick="deleteCurrentProduct()" class="hidden bg-red-600 text-white px-6 py-2.5 rounded-lg font-bold hover:bg-red-700 transition">Delete Product</button>
                         <button type="button" id="cancel-btn" onclick="cancelEdit()" class="hidden bg-gray-500 text-white px-6 py-2.5 rounded-lg font-bold hover:bg-gray-600 transition">Cancel</button>
                     </div>
                 </form>
@@ -115,7 +150,7 @@
                                 <th class="p-4 font-bold">Name</th>
                                 <th class="p-4 font-bold">Base Price</th>
                                 <th class="p-4 font-bold">Packages</th>
-                                <th class="p-4 font-bold">Actions</th>
+                                <th class="p-4 font-bold text-right">Edit Option</th>
                             </tr>
                         </thead>
                         <tbody id="products-list" class="divide-y divide-gray-100">
@@ -155,7 +190,7 @@
         </div>
     </div>
 
-    <!-- CUSTOM MODAL UI (Replaces standard alerts) -->
+    <!-- CUSTOM MODAL UI -->
     <div id="custom-modal" class="fixed inset-0 bg-gray-900 bg-opacity-60 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 transition-opacity">
         <div class="bg-white rounded-xl shadow-2xl max-w-sm w-full p-6 transform transition-all">
             <h3 id="modal-title" class="text-xl font-extrabold text-gray-900 mb-2">Notice</h3>
@@ -168,15 +203,15 @@
     </div>
 
     <script>
-        // --- YOUR ACTUAL SUPABASE KEYS ARE HERE ---
+        // --- SUPABASE SETUP ---
         const SUPABASE_URL = 'https://frifscjexvqhtptiwear.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_BQFducZtr7aIkYW4G8t7VA_p77ORs24';
-        
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let settings = { id: 1, whatsapp_number: '', delivery_charge: 150, steadfast_api_key: '', steadfast_secret_key: '' };
+        let currentOrdersData = []; // Keeps track of orders for Bulk Actions
 
-        // --- AUTHENTICATION LOGIC ---
+        // --- AUTH LOGIC ---
         async function checkSession() {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) {
@@ -213,7 +248,7 @@
             checkSession();
         }
 
-        // --- CUSTOM MODAL SYSTEM ---
+        // --- MODAL SYSTEM ---
         function showModal(title, message, isConfirm = false, onConfirm = null) {
             document.getElementById('modal-title').textContent = title;
             document.getElementById('modal-message').textContent = message;
@@ -221,7 +256,6 @@
             const cancelBtn = document.getElementById('modal-cancel');
             const confirmBtn = document.getElementById('modal-confirm');
             
-            // Clean previous listeners by replacing node
             const newConfirmBtn = confirmBtn.cloneNode(true);
             confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
             const newCancelBtn = cancelBtn.cloneNode(true);
@@ -246,29 +280,52 @@
             document.getElementById('custom-modal').classList.add('hidden');
         }
 
-        // --- TAB LOGIC ---
+        // --- TAB SYSTEM ---
         function switchTab(tabId) {
+            document.getElementById('dashboard-tab-view').classList.add('hidden');
             document.getElementById('products-view').classList.add('hidden');
             document.getElementById('orders-view').classList.add('hidden');
             document.getElementById('settings-view').classList.add('hidden');
             
-            const defaultTabClass = 'px-5 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-bold transition';
-            document.getElementById('tab-products').className = defaultTabClass;
-            document.getElementById('tab-orders').className = defaultTabClass;
-            document.getElementById('tab-settings').className = defaultTabClass;
+            const defaultClass = 'px-5 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-bold transition whitespace-nowrap';
+            const activeClass = 'px-5 py-2.5 bg-blue-600 text-white rounded-lg font-bold transition shadow-sm whitespace-nowrap';
 
-            document.getElementById(tabId + '-view').classList.remove('hidden');
-            document.getElementById('tab-' + tabId).className = 'px-5 py-2.5 bg-blue-600 text-white rounded-lg font-bold transition shadow-sm';
+            document.getElementById('tab-dashboard').className = defaultClass;
+            document.getElementById('tab-orders').className = defaultClass;
+            document.getElementById('tab-products').className = defaultClass;
+            document.getElementById('tab-settings').className = defaultClass;
+
+            const viewId = tabId === 'dashboard' ? 'dashboard-tab-view' : tabId + '-view';
+            document.getElementById(viewId).classList.remove('hidden');
+            document.getElementById('tab-' + tabId).className = activeClass;
             
+            if(tabId === 'dashboard') loadDashboardStats();
             if(tabId === 'products') loadProducts();
             if(tabId === 'orders') loadOrders();
             if(tabId === 'settings') loadSettings();
         }
 
-        // --- INITIALIZE DASHBOARD ---
         function initDashboard() {
-            switchTab('orders'); // Load orders by default
+            switchTab('dashboard'); // Always open Dashboard by default!
             loadSettings();
+        }
+
+        // --- 1. DASHBOARD ANALYTICS LOGIC ---
+        async function loadDashboardStats() {
+            const { data: orders, error } = await supabaseClient.from('orders').select('*');
+            if (error) return;
+
+            let totalRevenue = 0;
+            let pendingCount = 0;
+
+            orders.forEach(o => {
+                totalRevenue += parseFloat(o.total_amount) || 0;
+                if(o.order_status === 'pending' && !o.courier_consignment_id) pendingCount++;
+            });
+
+            document.getElementById('stat-revenue').textContent = '৳' + totalRevenue.toLocaleString('en-IN');
+            document.getElementById('stat-orders').textContent = orders.length;
+            document.getElementById('stat-pending').textContent = pendingCount;
         }
 
         // --- SETTINGS LOGIC ---
@@ -294,10 +351,8 @@
             };
 
             const { error } = await supabaseClient.from('store_settings').upsert(payload);
-            
-            if (error) {
-                showModal("Error", "Error saving settings: " + error.message);
-            } else {
+            if (error) showModal("Error", error.message);
+            else {
                 showModal("Success", "Settings Saved Successfully!");
                 settings = payload;
             }
@@ -306,7 +361,7 @@
         // --- PRODUCTS LOGIC ---
         async function loadProducts() {
             const { data: products, error } = await supabaseClient.from('products').select('*').order('created_at', { ascending: false });
-            if (error) return console.error(error);
+            if (error) return;
 
             const tbody = document.getElementById('products-list');
             tbody.innerHTML = '';
@@ -319,9 +374,8 @@
                     <td class="p-4 font-bold text-gray-900">${p.name}</td>
                     <td class="p-4 font-medium text-gray-700">৳${p.price}</td>
                     <td class="p-4 text-sm text-blue-600 font-medium">${p.unit_type || '-'}</td>
-                    <td class="p-4">
-                        <button onclick='editProduct(${JSON.stringify(p).replace(/'/g, "&#39;")})' class="text-blue-600 font-bold hover:underline mr-4">Edit</button>
-                        <button onclick="deleteProduct(${p.id})" class="text-red-500 font-bold hover:underline">Delete</button>
+                    <td class="p-4 text-right">
+                        <button onclick='editProduct(${JSON.stringify(p).replace(/'/g, "&#39;")})' class="bg-blue-100 hover:bg-blue-200 text-blue-700 font-bold px-4 py-2 rounded-lg transition">Edit</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -338,6 +392,7 @@
             
             document.getElementById('submit-btn').textContent = 'Update Product';
             document.getElementById('submit-btn').classList.replace('bg-green-600', 'bg-blue-600');
+            document.getElementById('delete-btn').classList.remove('hidden');
             document.getElementById('cancel-btn').classList.remove('hidden');
             window.scrollTo(0,0);
         }
@@ -347,14 +402,20 @@
             document.getElementById('edit-id').value = '';
             document.getElementById('submit-btn').textContent = 'Add Product';
             document.getElementById('submit-btn').classList.replace('bg-blue-600', 'bg-green-600');
+            document.getElementById('delete-btn').classList.add('hidden');
             document.getElementById('cancel-btn').classList.add('hidden');
         }
 
-        function deleteProduct(id) {
+        function deleteCurrentProduct() {
+            const id = document.getElementById('edit-id').value;
+            if(!id) return;
             showModal("Confirm Delete", "Are you sure you want to delete this product?", true, async () => {
                 const { error } = await supabaseClient.from('products').delete().eq('id', id);
                 if(error) showModal("Error", error.message);
-                else loadProducts();
+                else {
+                    cancelEdit();
+                    loadProducts();
+                }
             });
         }
 
@@ -385,10 +446,14 @@
             }
         });
 
-        // --- ORDERS LOGIC ---
+        // --- 2. CUSTOMER ORDERS & BULK CHECKBOX LOGIC ---
         async function loadOrders() {
             const { data: orders, error } = await supabaseClient.from('orders').select('*').order('created_at', { ascending: false });
             if (error) return console.error(error);
+
+            currentOrdersData = orders; // Save to global array for bulk ops
+            document.getElementById('select-all-orders').checked = false;
+            updateBulkButton();
 
             const tbody = document.getElementById('orders-list');
             tbody.innerHTML = '';
@@ -397,7 +462,11 @@
                 const isSent = o.courier_consignment_id != null;
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-gray-50';
+                
                 tr.innerHTML = `
+                    <td class="p-4 text-center">
+                        <input type="checkbox" value="${o.id}" class="order-checkbox w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer" onchange="updateBulkButton()" ${isSent ? 'disabled' : ''}>
+                    </td>
                     <td class="p-4 text-sm font-medium text-gray-500">#${o.id}</td>
                     <td class="p-4 font-bold text-gray-900">${o.customer_name}</td>
                     <td class="p-4 font-medium text-gray-700">${o.customer_phone}</td>
@@ -407,13 +476,14 @@
                     <td class="p-4 font-extrabold text-green-700">৳${o.total_amount}</td>
                     <td class="p-4">
                         <span class="px-3 py-1 text-xs font-bold rounded-full ${isSent ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'bg-amber-50 text-amber-700 border border-amber-200'}">
-                            ${isSent ? 'Sent to Courier' : o.order_status}
+                            ${isSent ? 'Shipped' : o.order_status}
                         </span>
                     </td>
-                    <td class="p-4">
+                    <td class="p-4 text-right whitespace-nowrap">
                         ${isSent 
                             ? `<span class="text-xs font-mono font-bold text-gray-500 bg-gray-100 px-2 py-1 rounded">ID: ${o.courier_consignment_id}</span>` 
-                            : `<button onclick='sendToSteadfast(${JSON.stringify(o).replace(/'/g, "&#39;")})' class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2 rounded-lg transition shadow-sm">Send to Steadfast</button>`
+                            : `<button onclick='sendToSteadfast(${JSON.stringify(o).replace(/'/g, "&#39;")})' class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-3 py-2 rounded-lg transition shadow-sm mr-2">Send</button>
+                               <button onclick='deleteCustomerOrder(${o.id})' class="bg-red-100 hover:bg-red-200 text-red-700 text-xs font-bold px-3 py-2 rounded-lg transition shadow-sm">Delete</button>`
                         }
                     </td>
                 `;
@@ -421,7 +491,97 @@
             });
         }
 
-        // --- SERVERLESS BACKEND CALL ---
+        // Feature: Delete a customer order
+        function deleteCustomerOrder(id) {
+            showModal("Delete Order", `Are you sure you want to permanently delete order #${id}?`, true, async () => {
+                const { error } = await supabaseClient.from('orders').delete().eq('id', id);
+                if (error) showModal("Error", error.message);
+                else {
+                    loadOrders();
+                    loadDashboardStats(); // update numbers!
+                }
+            });
+        }
+
+        // Feature: Bulk Checkboxes logic
+        function toggleAllOrders(source) {
+            const checkboxes = document.querySelectorAll('.order-checkbox:not(:disabled)');
+            checkboxes.forEach(cb => cb.checked = source.checked);
+            updateBulkButton();
+        }
+
+        function updateBulkButton() {
+            const checkedCount = document.querySelectorAll('.order-checkbox:checked').length;
+            const btn = document.getElementById('bulk-send-btn');
+            
+            if (checkedCount > 0) {
+                btn.classList.remove('hidden');
+                btn.textContent = `Bulk Send (${checkedCount}) to Steadfast`;
+            } else {
+                btn.classList.add('hidden');
+            }
+        }
+
+        function bulkSendToSteadfast() {
+            const checkboxes = document.querySelectorAll('.order-checkbox:checked');
+            if(checkboxes.length === 0) return;
+            
+            if (!settings.steadfast_api_key || !settings.steadfast_secret_key) {
+                showModal("Missing Credentials", "Please save your Steadfast API Keys in the Settings tab first.");
+                return;
+            }
+
+            showModal("Confirm Bulk Dispatch", `Are you sure you want to send ${checkboxes.length} orders to Steadfast Courier?`, true, async () => {
+                showModal("Processing...", "Sending orders to courier. Please do not close this window...");
+                
+                let successCount = 0;
+                let failCount = 0;
+                
+                for(let cb of checkboxes) {
+                    const orderId = parseInt(cb.value);
+                    const order = currentOrdersData.find(o => o.id === orderId);
+                    
+                    if(order) {
+                        try {
+                            const response = await fetch('/.netlify/functions/steadfast', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    api_key: settings.steadfast_api_key,
+                                    secret_key: settings.steadfast_secret_key,
+                                    order_data: {
+                                        invoice: order.id.toString(),
+                                        recipient_name: order.customer_name,
+                                        recipient_phone: order.customer_phone,
+                                        recipient_address: order.delivery_address,
+                                        cod_amount: order.total_amount
+                                    }
+                                })
+                            });
+
+                            const result = await response.json();
+                            if (response.ok && result.status !== 400) {
+                                const consignment_id = result.consignment?.consignment_id || "SENT_SUCCESS";
+                                await supabaseClient.from('orders')
+                                    .update({ courier_consignment_id: consignment_id, order_status: 'shipped' })
+                                    .eq('id', order.id);
+                                successCount++;
+                            } else {
+                                failCount++;
+                            }
+                        } catch (err) {
+                            failCount++;
+                        }
+                    }
+                }
+                
+                showModal("Bulk Send Complete", `Successfully sent: ${successCount} orders. Failed: ${failCount} orders.`);
+                loadOrders();
+                loadDashboardStats();
+            });
+        }
+
+        // --- SINGLE SERVERLESS BACKEND CALL ---
         function sendToSteadfast(order) {
             if (!settings.steadfast_api_key || !settings.steadfast_secret_key) {
                 showModal("Missing Credentials", "Please save your Steadfast API Keys in the Settings tab first.");
@@ -465,6 +625,7 @@
                     } else {
                         showModal("Success", "Order successfully sent to Steadfast!");
                         loadOrders();
+                        loadDashboardStats();
                     }
 
                 } catch (err) {
