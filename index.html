@@ -96,6 +96,10 @@
                 <button onclick="switchTab('orders')" id="tab-orders" class="px-6 py-3 bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-xl font-bold transition-all shadow-sm whitespace-nowrap">Orders</button>
                 <button onclick="switchTab('products')" id="tab-products" class="px-6 py-3 bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-xl font-bold transition-all shadow-sm whitespace-nowrap">Products</button>
                 <button onclick="switchTab('settings')" id="tab-settings" class="px-6 py-3 bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-xl font-bold transition-all shadow-sm whitespace-nowrap">Settings</button>
+                <button onclick="switchTab('trash')" id="tab-trash" class="px-6 py-3 bg-white border border-slate-200 text-red-600 hover:bg-red-50 hover:text-red-700 rounded-xl font-bold transition-all shadow-sm whitespace-nowrap flex items-center gap-2">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    Trash
+                </button>
             </div>
 
             <!-- DASHBOARD ANALYTICS TAB -->
@@ -177,6 +181,40 @@
 
             </div>
 
+            <!-- TRASH TAB (Deleted Orders) -->
+            <div id="trash-view" class="hidden">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-5 gap-4">
+                    <div>
+                        <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">Trash Bin</h2>
+                        <p class="text-sm font-medium text-slate-500 mt-1">Orders here will be permanently deleted after 30 days.</p>
+                    </div>
+                    <button onclick="emptyTrash()" class="bg-red-50 hover:bg-red-100 text-red-600 font-bold py-2.5 px-6 rounded-xl transition-all shadow-sm border border-red-100 flex items-center gap-2">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        Empty Trash Now
+                    </button>
+                </div>
+                
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse whitespace-nowrap">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs uppercase tracking-wider">
+                                    <th class="p-5 font-bold">ID</th>
+                                    <th class="p-5 font-bold">Customer</th>
+                                    <th class="p-5 font-bold">Phone</th>
+                                    <th class="p-5 font-bold">Product</th>
+                                    <th class="p-5 font-bold">Total</th>
+                                    <th class="p-5 font-bold text-right">Options</th>
+                                </tr>
+                            </thead>
+                            <tbody id="trash-list" class="divide-y divide-slate-100">
+                                <!-- Trash load here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
             <!-- PRODUCTS TAB -->
             <div id="products-view" class="hidden">
                 <h2 class="text-xl font-extrabold mb-5 text-slate-900 tracking-tight">Manage Products</h2>
@@ -232,25 +270,37 @@
                 </div>
             </div>
 
-            <!-- SETTINGS TAB -->
+            <!-- SETTINGS TAB (Side-by-Side Modern Layout) -->
             <div id="settings-view" class="hidden">
                 <h2 class="text-xl font-extrabold mb-5 text-slate-900 tracking-tight">Store Settings</h2>
                 
-                <form id="settings-form" class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-200 max-w-2xl space-y-6">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">WhatsApp Number</label>
-                        <input type="text" id="whatsapp_number" placeholder="e.g. 8801700000000" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-forest/10 focus:border-forest outline-none transition-all font-medium text-sm">
-                    </div>
+                <form id="settings-form" class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-200 w-full">
                     
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Delivery Charge (৳)</label>
-                        <input type="number" id="delivery_charge" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-forest/10 focus:border-forest outline-none transition-all font-medium text-sm">
-                    </div>
-
-                    <div class="pt-6 border-t border-slate-100 mt-4">
-                        <h3 class="text-base font-extrabold mb-4 text-slate-900">Steadfast Courier Integration</h3>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
                         
-                        <div class="space-y-5">
+                        <!-- Column 1: Basic Config -->
+                        <div class="space-y-6">
+                            <h3 class="text-base font-extrabold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                                Basic Information
+                            </h3>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">WhatsApp Number</label>
+                                <input type="text" id="whatsapp_number" placeholder="e.g. 8801700000000" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-forest/10 focus:border-forest outline-none transition-all font-medium text-sm">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Delivery Charge (৳)</label>
+                                <input type="number" id="delivery_charge" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-forest/10 focus:border-forest outline-none transition-all font-medium text-sm">
+                            </div>
+                        </div>
+
+                        <!-- Column 2: API Config -->
+                        <div class="space-y-6">
+                            <h3 class="text-base font-extrabold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2 text-indigo-700">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                                Steadfast Integration
+                            </h3>
                             <div>
                                 <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">API Key</label>
                                 <input type="text" id="steadfast_api" placeholder="Paste your Steadfast API Key here" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all font-medium text-sm">
@@ -261,10 +311,12 @@
                                 <input type="password" id="steadfast_secret" placeholder="Paste your Steadfast Secret Key here" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all font-medium text-sm">
                             </div>
                         </div>
+
                     </div>
 
-                    <div class="pt-4">
-                        <button type="submit" class="w-full bg-slate-900 text-white px-4 py-4 rounded-xl font-bold hover:bg-black transition-all shadow-md">Save Settings</button>
+                    <!-- Footer Action -->
+                    <div class="pt-8 mt-6 border-t border-slate-100 flex justify-end">
+                        <button type="submit" class="w-full sm:w-auto px-10 bg-slate-900 text-white py-3.5 rounded-xl font-bold hover:bg-black transition-all shadow-md">Save Settings</button>
                     </div>
                 </form>
             </div>
@@ -371,23 +423,32 @@
             document.getElementById('products-view').classList.add('hidden');
             document.getElementById('orders-view').classList.add('hidden');
             document.getElementById('settings-view').classList.add('hidden');
+            document.getElementById('trash-view').classList.add('hidden');
             
             const defaultClass = 'px-6 py-3 bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-xl font-bold transition-all shadow-sm whitespace-nowrap';
             const activeClass = 'px-6 py-3 bg-forest border border-forest text-white rounded-xl font-bold transition-all shadow-md whitespace-nowrap';
+            const defaultTrashClass = 'px-6 py-3 bg-white border border-slate-200 text-red-600 hover:bg-red-50 hover:text-red-700 rounded-xl font-bold transition-all shadow-sm whitespace-nowrap flex items-center gap-2';
+            const activeTrashClass = 'px-6 py-3 bg-red-600 border border-red-600 text-white rounded-xl font-bold transition-all shadow-md whitespace-nowrap flex items-center gap-2';
 
-            document.getElementById('tab-dashboard').className = defaultClass;
-            document.getElementById('tab-orders').className = defaultClass;
-            document.getElementById('tab-products').className = defaultClass;
-            document.getElementById('tab-settings').className = defaultClass;
+            ['dashboard', 'orders', 'products', 'settings'].forEach(t => {
+                document.getElementById('tab-' + t).className = defaultClass;
+            });
+            document.getElementById('tab-trash').className = defaultTrashClass;
 
             const viewId = tabId === 'dashboard' ? 'dashboard-tab-view' : tabId + '-view';
             document.getElementById(viewId).classList.remove('hidden');
-            document.getElementById('tab-' + tabId).className = activeClass;
+            
+            if (tabId === 'trash') {
+                document.getElementById('tab-trash').className = activeTrashClass;
+            } else {
+                document.getElementById('tab-' + tabId).className = activeClass;
+            }
             
             if(tabId === 'dashboard') loadDashboardStats();
             if(tabId === 'products') loadProducts();
             if(tabId === 'orders') loadOrders();
             if(tabId === 'settings') loadSettings();
+            if(tabId === 'trash') loadTrash();
         }
 
         function initDashboard() {
@@ -397,8 +458,11 @@
 
         // --- 1. DASHBOARD ANALYTICS LOGIC ---
         async function loadDashboardStats() {
-            const { data: orders, error } = await supabaseClient.from('orders').select('*');
+            const { data: allOrders, error } = await supabaseClient.from('orders').select('*');
             if (error) return;
+
+            // Only count active orders, not trashed ones!
+            const orders = allOrders.filter(o => o.order_status !== 'trashed');
 
             let totalRevenue = 0;
             let pendingCount = 0;
@@ -492,14 +556,12 @@
             document.getElementById('cancel-btn').classList.add('hidden');
         }
 
-        // Delete from the top form button
         function deleteCurrentProduct() {
             const id = document.getElementById('edit-id').value;
             if(!id) return;
             deleteProductRow(id);
         }
 
-        // Delete from the table row directly
         function deleteProductRow(id) {
             showModal("Confirm Delete", "Are you sure you want to delete this product?", true, async () => {
                 const { error } = await supabaseClient.from('products').delete().eq('id', id);
@@ -540,11 +602,12 @@
 
         // --- 2. CUSTOMER ORDERS & PAGINATION LOGIC ---
         async function loadOrders() {
-            const { data: orders, error } = await supabaseClient.from('orders').select('*').order('created_at', { ascending: false });
+            const { data: allOrders, error } = await supabaseClient.from('orders').select('*').order('created_at', { ascending: false });
             if (error) return console.error(error);
 
-            currentOrdersData = orders; // Save to global array
-            currentPage = 1; // Reset to page 1
+            // Filter out trashed orders so they don't show in the main list
+            currentOrdersData = allOrders.filter(o => o.order_status !== 'trashed'); 
+            currentPage = 1; 
             renderOrdersPage();
         }
 
@@ -564,7 +627,6 @@
             const endIdx = Math.min(startIdx + ordersPerPage, totalOrders);
             const pageOrders = currentOrdersData.slice(startIdx, endIdx);
 
-            // Update Pagination Text and Buttons
             document.getElementById('order-page-info').textContent = `Showing ${totalOrders === 0 ? 0 : startIdx + 1} to ${endIdx} of ${totalOrders} orders`;
             document.getElementById('btn-prev-page').disabled = currentPage === 1;
             document.getElementById('btn-next-page').disabled = currentPage === totalPages;
@@ -611,7 +673,6 @@
             });
         }
 
-        // Pagination Triggers
         function prevOrdersPage() {
             if (currentPage > 1) {
                 currentPage--;
@@ -627,19 +688,18 @@
             }
         }
 
-        // Feature: Delete a customer order
+        // Feature: Soft Delete an order (Moves to Trash)
         function deleteCustomerOrder(id) {
-            showModal("Delete Order", `Are you sure you want to permanently delete order #${id}?`, true, async () => {
-                const { error } = await supabaseClient.from('orders').delete().eq('id', id);
+            showModal("Move to Trash", `Are you sure you want to move order #${id} to the trash?`, true, async () => {
+                const { error } = await supabaseClient.from('orders').update({ order_status: 'trashed' }).eq('id', id);
                 if (error) showModal("Error", error.message);
                 else {
-                    loadOrders(); // Will re-fetch and jump back to Page 1
-                    loadDashboardStats(); // update numbers!
+                    loadOrders(); 
+                    loadDashboardStats(); 
                 }
             });
         }
 
-        // Feature: Bulk Checkboxes logic
         function toggleAllOrders(source) {
             const checkboxes = document.querySelectorAll('.order-checkbox:not(:disabled)');
             checkboxes.forEach(cb => cb.checked = source.checked);
@@ -768,6 +828,81 @@
                     showModal("Connection Failed", "Could not reach the Netlify backend. Make sure your serverless function is uploaded correctly.");
                     console.error(err);
                 }
+            });
+        }
+
+        // --- 3. TRASH LOGIC (Auto Cleanup) ---
+        async function loadTrash() {
+            const { data: orders, error } = await supabaseClient.from('orders').select('*').eq('order_status', 'trashed').order('created_at', { ascending: false });
+            if (error) return console.error(error);
+
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+            
+            let displayOrders = [];
+            
+            // Auto delete old trashed orders on load
+            for (let o of orders) {
+                const orderDate = new Date(o.created_at);
+                if (orderDate < thirtyDaysAgo) {
+                    await supabaseClient.from('orders').delete().eq('id', o.id);
+                } else {
+                    displayOrders.push(o);
+                }
+            }
+
+            const tbody = document.getElementById('trash-list');
+            tbody.innerHTML = '';
+            
+            if(displayOrders.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="p-5 text-center text-slate-500 font-bold">Your Trash bin is empty.</td></tr>';
+                return;
+            }
+
+            displayOrders.forEach(o => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-red-50/30 transition-colors';
+                tr.innerHTML = `
+                    <td class="p-5 border-b border-slate-100 text-sm font-bold text-slate-400">#${o.id}</td>
+                    <td class="p-5 border-b border-slate-100 font-bold text-slate-900">${o.customer_name}</td>
+                    <td class="p-5 border-b border-slate-100 text-sm font-medium text-slate-600">${o.customer_phone}</td>
+                    <td class="p-5 border-b border-slate-100 text-sm font-bold text-slate-700">${o.product_name || 'N/A'}</td>
+                    <td class="p-5 border-b border-slate-100 font-black text-slate-700">৳${o.total_amount}</td>
+                    <td class="p-5 border-b border-slate-100 text-right whitespace-nowrap">
+                        <div class="flex items-center justify-end gap-2">
+                            <button onclick='restoreOrder(${o.id})' class="bg-blue-50 hover:bg-blue-100 text-blue-600 text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow-sm">Restore</button>
+                            <button onclick='permanentlyDeleteOrder(${o.id})' class="bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold px-4 py-2.5 rounded-xl transition-all border border-red-100 shadow-sm">Delete Forever</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function restoreOrder(id) {
+            showModal("Restore Order", `Are you sure you want to restore order #${id} back to your active list?`, true, async () => {
+                const { error } = await supabaseClient.from('orders').update({ order_status: 'pending' }).eq('id', id);
+                if (error) showModal("Error", error.message);
+                else {
+                    loadTrash();
+                    loadDashboardStats();
+                }
+            });
+        }
+
+        function permanentlyDeleteOrder(id) {
+            showModal("Permanent Delete", `Are you sure you want to completely erase order #${id}? This CANNOT be undone!`, true, async () => {
+                const { error } = await supabaseClient.from('orders').delete().eq('id', id);
+                if (error) showModal("Error", error.message);
+                else loadTrash();
+            });
+        }
+
+        function emptyTrash() {
+            showModal("Empty Trash", `Are you sure you want to permanently delete ALL items in the trash? This CANNOT be undone!`, true, async () => {
+                const { error } = await supabaseClient.from('orders').delete().eq('order_status', 'trashed');
+                if (error) showModal("Error", error.message);
+                else loadTrash();
             });
         }
 
