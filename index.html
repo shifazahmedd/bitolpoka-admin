@@ -221,6 +221,7 @@
                 
                 <form id="add-product-form" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm mb-8">
                     <input type="hidden" id="edit-id" value="">
+                    
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
                         <div>
                             <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Product Name</label>
@@ -235,10 +236,17 @@
                             <input type="text" id="image_url" required class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-forest/10 focus:border-forest outline-none transition-all font-medium text-sm">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Packages</label>
-                            <input type="text" id="packages" placeholder="e.g., 30:300, 50:500" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-forest/10 focus:border-forest outline-none transition-all font-medium text-sm">
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Unit Type (e.g., pcs, kg, grams)</label>
+                            <input type="text" id="unit_type" placeholder="pcs" required class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-forest/10 focus:border-forest outline-none transition-all font-medium text-sm">
                         </div>
                     </div>
+                    
+                    <div class="mb-5">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Packages (Volume Pricing)</label>
+                        <input type="text" id="packages" placeholder="e.g., 30:300, 50:500" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-forest/10 focus:border-forest outline-none transition-all font-medium text-sm">
+                        <p class="text-xs text-slate-400 mt-1.5 font-medium">Format: Quantity:TotalPrice, Quantity:TotalPrice</p>
+                    </div>
+
                     <div class="mb-6">
                         <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Description</label>
                         <textarea id="description" rows="3" required class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-forest/10 focus:border-forest outline-none transition-all font-medium text-sm resize-none"></textarea>
@@ -522,7 +530,7 @@
                     <td class="p-5 border-b border-slate-100"><img src="${p.image_urls ? p.image_urls[0] : ''}" class="w-12 h-12 object-cover rounded-xl shadow-sm border border-slate-200"></td>
                     <td class="p-5 border-b border-slate-100 font-bold text-slate-900">${p.name}</td>
                     <td class="p-5 border-b border-slate-100 font-extrabold text-forest">৳${p.price}</td>
-                    <td class="p-5 border-b border-slate-100"><span class="bg-slate-100 text-slate-600 px-3 py-1.5 rounded-xl font-bold text-xs border border-slate-200">${p.unit_type || '-'}</span></td>
+                    <td class="p-5 border-b border-slate-100"><span class="bg-slate-100 text-slate-600 px-3 py-1.5 rounded-xl font-bold text-xs border border-slate-200">${p.packages || '-'}</span></td>
                     <td class="p-5 border-b border-slate-100 text-right whitespace-nowrap">
                         <button onclick='editProduct(${JSON.stringify(p).replace(/'/g, "&#39;")})' class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-4 py-2.5 rounded-xl transition-all mr-2 text-sm">Edit</button>
                         <button onclick='deleteProductRow(${p.id})' class="bg-red-50 hover:bg-red-100 text-red-600 font-bold px-4 py-2.5 rounded-xl transition-all text-sm">Delete</button>
@@ -536,9 +544,10 @@
             document.getElementById('edit-id').value = p.id;
             document.getElementById('name').value = p.name;
             document.getElementById('price').value = p.price;
-            document.getElementById('image_url').value = p.image_urls[0];
+            document.getElementById('image_url').value = p.image_urls ? p.image_urls[0] : '';
             document.getElementById('description').value = p.description;
-            document.getElementById('packages').value = p.unit_type || '';
+            document.getElementById('unit_type').value = p.unit_type || 'pcs';
+            document.getElementById('packages').value = p.packages || '';
             
             document.getElementById('submit-btn').textContent = 'Update Product';
             document.getElementById('submit-btn').classList.replace('bg-forest', 'bg-slate-900');
@@ -556,12 +565,14 @@
             document.getElementById('cancel-btn').classList.add('hidden');
         }
 
+        // Delete from the top form button
         function deleteCurrentProduct() {
             const id = document.getElementById('edit-id').value;
             if(!id) return;
             deleteProductRow(id);
         }
 
+        // Delete from the table row directly
         function deleteProductRow(id) {
             showModal("Confirm Delete", "Are you sure you want to delete this product?", true, async () => {
                 const { error } = await supabaseClient.from('products').delete().eq('id', id);
@@ -581,7 +592,8 @@
                 price: parseFloat(document.getElementById('price').value),
                 image_urls: [document.getElementById('image_url').value],
                 description: document.getElementById('description').value,
-                unit_type: document.getElementById('packages').value 
+                unit_type: document.getElementById('unit_type').value,
+                packages: document.getElementById('packages').value 
             };
 
             let error;
