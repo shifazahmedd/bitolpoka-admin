@@ -222,14 +222,26 @@
                 <form id="add-product-form" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm mb-8">
                     <input type="hidden" id="edit-id" value="">
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-5">
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Packages</label>
-                            <input type="text" id="packages" placeholder="e.g., 30:300, 50:500" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-forest/10 focus:border-forest outline-none transition-all font-medium text-sm">
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Product Name</label>
+                            <input type="text" id="name" required class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-forest/10 focus:border-forest outline-none transition-all font-medium text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Base Price (৳)</label>
+                            <input type="number" id="price" required class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-forest/10 focus:border-forest outline-none transition-all font-medium text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Image URL</label>
+                            <input type="text" id="image_url" required class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-forest/10 focus:border-forest outline-none transition-all font-medium text-sm">
                         </div>
                     </div>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-5">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Packages (Volume Pricing)</label>
+                            <input type="text" id="packages" placeholder="e.g., 30:300, 50:500" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-forest/10 focus:border-forest outline-none transition-all font-medium text-sm">
+                        </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Product Category</label>
                             <select id="category" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-forest/10 focus:border-forest outline-none transition-all font-medium text-sm">
@@ -250,6 +262,7 @@
                         <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Description</label>
                         <textarea id="description" rows="3" required class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-forest/10 focus:border-forest outline-none transition-all font-medium text-sm resize-none"></textarea>
                     </div>
+                    
                     <div class="flex flex-wrap gap-3">
                         <button type="submit" id="submit-btn" class="bg-forest hover:bg-forestHover text-white px-6 py-3 rounded-xl font-bold transition-all shadow-sm">Add Product</button>
                         <button type="button" id="delete-btn" onclick="deleteCurrentProduct()" class="hidden bg-red-50 hover:bg-red-100 text-red-600 px-6 py-3 rounded-xl font-bold transition-all">Delete Product</button>
@@ -263,9 +276,9 @@
                             <thead>
                                 <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs uppercase tracking-wider">
                                     <th class="p-5 font-bold">Image</th>
-                                    <th class="p-5 font-bold">Name & Category</th>
+                                    <th class="p-5 font-bold">Name & Details</th>
                                     <th class="p-5 font-bold">Base Price</th>
-                                    <th class="p-5 font-bold">Payment Setup</th>
+                                    <th class="p-5 font-bold">Packages Setup</th>
                                     <th class="p-5 font-bold text-right">Actions</th>
                                 </tr>
                             </thead>
