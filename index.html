@@ -350,8 +350,9 @@
 
         let settings = { id: 1, whatsapp_number: '', delivery_charge: 150, steadfast_api_key: '', steadfast_secret_key: '' };
         
-        // Orders Pagination Variables
+        // Pagination & Global Data Variables
         let currentOrdersData = []; 
+        let currentProductsData = []; // FIX: Added this to safely store products in the background
         let currentPage = 1;
         const ordersPerPage = 15;
 
@@ -519,6 +520,8 @@
             const { data: products, error } = await supabaseClient.from('products').select('*').order('created_at', { ascending: false });
             if (error) return;
 
+            currentProductsData = products; // Save to global array safely
+
             const tbody = document.getElementById('products-list');
             tbody.innerHTML = '';
 
@@ -526,7 +529,7 @@
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-slate-50/50 transition-colors';
                 
-                // Add nice badges for category and payment
+                // Safe fallbacks for older products
                 const catBadge = p.category === 'Dried Worms' 
                     ? `<span class="px-2 py-1 text-[10px] font-bold bg-amber-100 text-amber-700 rounded-md uppercase tracking-wide">Dried Worms</span>`
                     : `<span class="px-2 py-1 text-[10px] font-bold bg-green-100 text-green-700 rounded-md uppercase tracking-wide">Live Feed</span>`;
@@ -536,34 +539,51 @@
                     : `<span class="px-2 py-1 text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200 rounded-md uppercase tracking-wide">COD Available</span>`;
 
                 tr.innerHTML = `
-                    <td class="p-5 border-b border-slate-100"><img src="${p.image_urls ? p.image_urls[0] : ''}" class="w-12 h-12 object-cover rounded-xl shadow-sm border border-slate-200"></td>
+                    <td class="p-5 border-b border-slate-100"><img src="${p.image_urls && p.image_urls.length > 0 ? p.image_urls[0] : ''}" class="w-12 h-12 object-cover rounded-xl shadow-sm border border-slate-200"></td>
                     <td class="p-5 border-b border-slate-100">
                         <p class="font-bold text-slate-900 mb-1">${p.name}</p>
-                        ${catBadge}
+                        ${p.category ? catBadge : ''}
                     </td>
                     <td class="p-5 border-b border-slate-100 font-extrabold text-forest">৳${p.price}</td>
-                    <td class="p-5 border-b border-slate-100">${payBadge}</td>
+                    <td class="p-5 border-b border-slate-100">${p.payment_option ? payBadge : (p.packages || '-')}</td>
                     <td class="p-5 border-b border-slate-100 text-right whitespace-nowrap">
-                        <button onclick='editProduct(${JSON.stringify(p).replace(/'/g, "&#39;")})' class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-4 py-2.5 rounded-xl transition-all mr-2 text-sm">Edit</button>
-                        <button onclick='deleteProductRow(${p.id})' class="bg-red-50 hover:bg-red-100 text-red-600 font-bold px-4 py-2.5 rounded-xl transition-all text-sm">Delete</button>
+                        <button onclick="editProduct(${p.id})" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-4 py-2.5 rounded-xl transition-all mr-2 text-sm">Edit</button>
+                        <button onclick="deleteProductRow(${p.id})" class="bg-red-50 hover:bg-red-100 text-red-600 font-bold px-4 py-2.5 rounded-xl transition-all text-sm">Delete</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        function editProduct(p) {
+        // FIX: Now we just pass the ID, completely avoiding string bugs!
+        function editProduct(id) {
+            const p = currentProductsData.find(prod => prod.id === id);
+            if (!p) return;
+
             document.getElementById('edit-id').value = p.id;
-            document.getElementById('name').value = p.name;
-            document.getElementById('price').value = p.price;
-            document.getElementById('image_url').value = p.image_urls ? p.image_urls[0] : '';
-            document.getElementById('description').value = p.description;
-            document.getElementById('packages').value = p.packages || '';
-            document.getElementById('category').value = p.category || 'Live Feed';
-            document.getElementById('payment_option').value = p.payment_option || 'Cash on Delivery';
+            
+            if (document.getElementById('name')) document.getElementById('name').value = p.name || '';
+            if (document.getElementById('price')) document.getElementById('price').value = p.price || '';
+            
+            const imageEl = document.getElementById('image_url');
+            if (imageEl) imageEl.value = p.image_urls && p.image_urls.length > 0 ? p.image_urls[0] : '';
+            
+            const descEl = document.getElementById('description');
+            if (descEl) descEl.value = p.description || '';
+            
+            const packageEl = document.getElementById('packages');
+            if (packageEl) packageEl.value = p.packages || '';
+            
+            const categoryEl = document.getElementById('category');
+            if (categoryEl) categoryEl.value = p.category || 'Live Feed';
+            
+            const paymentEl = document.getElementById('payment_option');
+            if (paymentEl) paymentEl.value = p.payment_option || 'Cash on Delivery';
             
             document.getElementById('submit-btn').textContent = 'Update Product';
-            document.getElementById('submit-btn').classList.replace('bg-forest', 'bg-slate-900');
+            if (document.getElementById('submit-btn').classList.contains('bg-forest')) {
+                document.getElementById('submit-btn').classList.replace('bg-forest', 'bg-slate-900');
+            }
             document.getElementById('delete-btn').classList.remove('hidden');
             document.getElementById('cancel-btn').classList.remove('hidden');
             window.scrollTo(0,0);
