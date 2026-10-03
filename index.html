@@ -224,27 +224,26 @@
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Product Name</label>
-                            <input type="text" id="name" required class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-forest/10 focus:border-forest outline-none transition-all font-medium text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Base Price (৳)</label>
-                            <input type="number" id="price" required class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-forest/10 focus:border-forest outline-none transition-all font-medium text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Image URL</label>
-                            <input type="text" id="image_url" required class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-forest/10 focus:border-forest outline-none transition-all font-medium text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Unit Type (e.g., pcs, kg, grams)</label>
-                            <input type="text" id="unit_type" placeholder="pcs" required class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-forest/10 focus:border-forest outline-none transition-all font-medium text-sm">
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Packages</label>
+                            <input type="text" id="packages" placeholder="e.g., 30:300, 50:500" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-forest/10 focus:border-forest outline-none transition-all font-medium text-sm">
                         </div>
                     </div>
                     
-                    <div class="mb-5">
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Packages (Volume Pricing)</label>
-                        <input type="text" id="packages" placeholder="e.g., 30:300, 50:500" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-forest/10 focus:border-forest outline-none transition-all font-medium text-sm">
-                        <p class="text-xs text-slate-400 mt-1.5 font-medium">Format: Quantity:TotalPrice, Quantity:TotalPrice</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Product Category</label>
+                            <select id="category" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-forest/10 focus:border-forest outline-none transition-all font-medium text-sm">
+                                <option value="Live Feed">Live Feed</option>
+                                <option value="Dried Worms">Dried Worms</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Payment Requirement</label>
+                            <select id="payment_option" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-forest/10 focus:border-forest outline-none transition-all font-medium text-sm">
+                                <option value="Cash on Delivery">Cash on Delivery (COD)</option>
+                                <option value="Advance Payment">Advance Payment Required</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div class="mb-6">
@@ -264,9 +263,9 @@
                             <thead>
                                 <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs uppercase tracking-wider">
                                     <th class="p-5 font-bold">Image</th>
-                                    <th class="p-5 font-bold">Name</th>
+                                    <th class="p-5 font-bold">Name & Category</th>
                                     <th class="p-5 font-bold">Base Price</th>
-                                    <th class="p-5 font-bold">Packages</th>
+                                    <th class="p-5 font-bold">Payment Setup</th>
                                     <th class="p-5 font-bold text-right">Actions</th>
                                 </tr>
                             </thead>
@@ -526,11 +525,24 @@
             products.forEach(p => {
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-slate-50/50 transition-colors';
+                
+                // Add nice badges for category and payment
+                const catBadge = p.category === 'Dried Worms' 
+                    ? `<span class="px-2 py-1 text-[10px] font-bold bg-amber-100 text-amber-700 rounded-md uppercase tracking-wide">Dried Worms</span>`
+                    : `<span class="px-2 py-1 text-[10px] font-bold bg-green-100 text-green-700 rounded-md uppercase tracking-wide">Live Feed</span>`;
+                    
+                const payBadge = p.payment_option === 'Advance Payment'
+                    ? `<span class="px-2 py-1 text-[10px] font-bold bg-pink-100 text-pink-700 border border-pink-200 rounded-md uppercase tracking-wide">Advance Only</span>`
+                    : `<span class="px-2 py-1 text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200 rounded-md uppercase tracking-wide">COD Available</span>`;
+
                 tr.innerHTML = `
                     <td class="p-5 border-b border-slate-100"><img src="${p.image_urls ? p.image_urls[0] : ''}" class="w-12 h-12 object-cover rounded-xl shadow-sm border border-slate-200"></td>
-                    <td class="p-5 border-b border-slate-100 font-bold text-slate-900">${p.name}</td>
+                    <td class="p-5 border-b border-slate-100">
+                        <p class="font-bold text-slate-900 mb-1">${p.name}</p>
+                        ${catBadge}
+                    </td>
                     <td class="p-5 border-b border-slate-100 font-extrabold text-forest">৳${p.price}</td>
-                    <td class="p-5 border-b border-slate-100"><span class="bg-slate-100 text-slate-600 px-3 py-1.5 rounded-xl font-bold text-xs border border-slate-200">${p.packages || '-'}</span></td>
+                    <td class="p-5 border-b border-slate-100">${payBadge}</td>
                     <td class="p-5 border-b border-slate-100 text-right whitespace-nowrap">
                         <button onclick='editProduct(${JSON.stringify(p).replace(/'/g, "&#39;")})' class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-4 py-2.5 rounded-xl transition-all mr-2 text-sm">Edit</button>
                         <button onclick='deleteProductRow(${p.id})' class="bg-red-50 hover:bg-red-100 text-red-600 font-bold px-4 py-2.5 rounded-xl transition-all text-sm">Delete</button>
@@ -546,8 +558,9 @@
             document.getElementById('price').value = p.price;
             document.getElementById('image_url').value = p.image_urls ? p.image_urls[0] : '';
             document.getElementById('description').value = p.description;
-            document.getElementById('unit_type').value = p.unit_type || 'pcs';
             document.getElementById('packages').value = p.packages || '';
+            document.getElementById('category').value = p.category || 'Live Feed';
+            document.getElementById('payment_option').value = p.payment_option || 'Cash on Delivery';
             
             document.getElementById('submit-btn').textContent = 'Update Product';
             document.getElementById('submit-btn').classList.replace('bg-forest', 'bg-slate-900');
@@ -559,6 +572,8 @@
         function cancelEdit() {
             document.getElementById('add-product-form').reset();
             document.getElementById('edit-id').value = '';
+            document.getElementById('category').value = 'Live Feed';
+            document.getElementById('payment_option').value = 'Cash on Delivery';
             document.getElementById('submit-btn').textContent = 'Add Product';
             document.getElementById('submit-btn').classList.replace('bg-slate-900', 'bg-forest');
             document.getElementById('delete-btn').classList.add('hidden');
@@ -592,8 +607,9 @@
                 price: parseFloat(document.getElementById('price').value),
                 image_urls: [document.getElementById('image_url').value],
                 description: document.getElementById('description').value,
-                unit_type: document.getElementById('unit_type').value,
-                packages: document.getElementById('packages').value 
+                packages: document.getElementById('packages').value,
+                category: document.getElementById('category').value,
+                payment_option: document.getElementById('payment_option').value
             };
 
             let error;
