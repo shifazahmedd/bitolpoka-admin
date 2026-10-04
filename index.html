@@ -667,15 +667,18 @@
         document.getElementById('add-product-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const id = document.getElementById('edit-id').value;
+            
+            // Magically split the commas into an array for the database
+            const rawUrls = document.getElementById('image_url').value;
+            const imageUrlsArray = rawUrls.split(',').map(url => url.trim()).filter(url => url !== '');
+
             const product = {
                 name: document.getElementById('name').value,
                 price: parseFloat(document.getElementById('price').value),
-                image_urls: [document.getElementById('image_url').value],
+                image_urls: imageUrlsArray,
                 description: document.getElementById('description').value,
-                packages: document.getElementById('packages').value,
-                category: document.getElementById('category').value,
-                payment_option: document.getElementById('payment_option').value,
-                unit_type: document.getElementById('unit_type').value
+                unit_type: document.getElementById('unit_type').value,
+                packages: document.getElementById('packages').value 
             };
 
             let error;
