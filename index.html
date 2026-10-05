@@ -125,7 +125,7 @@
                     <!-- Total Lifetime Orders Card -->
                     <div class="p-6 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-center relative overflow-hidden">
                         <div class="absolute top-0 right-0 p-6 opacity-5">
-                            <svg width="64" height="64" viewBox="0 0 24 24" fill="currentColor"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/></svg>
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="currentColor"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/></svg>
                         </div>
                         <p class="text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-2">Total Orders</p>
                         <p class="text-4xl font-black text-blue-600" id="stat-orders">0</p>
@@ -154,11 +154,9 @@
                                     </th>
                                     <th class="p-5 font-bold">ID</th>
                                     <th class="p-5 font-bold">Customer</th>
-                                    <th class="p-5 font-bold">Phone</th>
                                     <th class="p-5 font-bold">Address</th>
                                     <th class="p-5 font-bold">Product</th>
-                                    <th class="p-5 font-bold">Qty</th>
-                                    <th class="p-5 font-bold">Total</th>
+                                    <th class="p-5 font-bold">Total & Payment</th>
                                     <th class="p-5 font-bold">Status</th>
                                     <th class="p-5 font-bold text-right">Options</th>
                                 </tr>
@@ -748,12 +746,26 @@
                 tr.className = 'hover:bg-slate-50/50 transition-colors';
                 
                 let statusBadge = '';
+                let verifyBtn = '';
+
                 if (isSent) {
                     statusBadge = `<span class="px-3 py-1.5 text-xs font-bold rounded-xl bg-blue-50 text-blue-600 border border-blue-100">Shipped</span>`;
+                } else if (o.payment_method === 'bKash/Nagod' && o.order_status === 'pending') {
+                    statusBadge = `<span class="px-3 py-1.5 text-xs font-bold rounded-xl bg-pink-50 text-pink-600 border border-pink-200">Needs Verification</span>`;
+                    verifyBtn = `<button onclick='verifyOrder(${o.id})' class="bg-green-100 hover:bg-green-200 text-green-700 text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow-sm">Verify Payment</button>`;
+                } else if (o.order_status === 'verified') {
+                    statusBadge = `<span class="px-3 py-1.5 text-xs font-bold rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200">Payment Verified</span>`;
                 } else if (o.order_status === 'pending') {
-                    statusBadge = `<span class="px-3 py-1.5 text-xs font-bold rounded-xl bg-amber-50 text-amber-600 border border-amber-100">Pending</span>`;
+                    statusBadge = `<span class="px-3 py-1.5 text-xs font-bold rounded-xl bg-amber-50 text-amber-600 border border-amber-100">Pending COD</span>`;
                 } else {
                     statusBadge = `<span class="px-3 py-1.5 text-xs font-bold rounded-xl bg-slate-100 text-slate-600 border border-slate-200">${o.order_status}</span>`;
+                }
+
+                let paymentDetails = `৳${o.total_amount}`;
+                if (o.payment_method === 'bKash/Nagod') {
+                    paymentDetails += `<br><span class="text-[10px] font-mono font-bold text-pink-600 bg-pink-50 px-2 py-1 rounded-md mt-1 inline-block border border-pink-100">TrxID: ${o.transaction_id || 'N/A'}</span>`;
+                } else {
+                    paymentDetails += `<br><span class="text-[10px] font-bold text-slate-500 mt-1 inline-block">COD</span>`;
                 }
 
                 tr.innerHTML = `
@@ -761,17 +773,22 @@
                         <input type="checkbox" value="${o.id}" class="order-checkbox w-4 h-4 text-forest rounded border-slate-300 focus:ring-forest cursor-pointer" onchange="updateBulkButton()" ${isSent ? 'disabled' : ''}>
                     </td>
                     <td class="p-5 border-b border-slate-100 text-sm font-bold text-slate-400">#${o.id}</td>
-                    <td class="p-5 border-b border-slate-100 font-bold text-slate-900">${o.customer_name}</td>
-                    <td class="p-5 border-b border-slate-100 text-sm font-medium text-slate-600">${o.customer_phone}</td>
+                    <td class="p-5 border-b border-slate-100 font-bold text-slate-900">
+                        ${o.customer_name}
+                        <br><span class="text-xs font-medium text-slate-500">${o.customer_phone}</span>
+                    </td>
                     <td class="p-5 border-b border-slate-100 text-sm max-w-xs truncate text-slate-500" title="${o.delivery_address}">${o.delivery_address}</td>
-                    <td class="p-5 border-b border-slate-100 text-sm font-bold text-slate-700">${o.product_name || 'N/A'}</td>
-                    <td class="p-5 border-b border-slate-100 text-sm font-bold text-slate-600">${o.quantity || '-'}</td>
-                    <td class="p-5 border-b border-slate-100 font-black text-forest">৳${o.total_amount}</td>
+                    <td class="p-5 border-b border-slate-100 text-sm font-bold text-slate-700">
+                        ${o.product_name || 'N/A'}
+                        <br><span class="text-xs font-bold text-slate-500">Qty: ${o.quantity || '-'}</span>
+                    </td>
+                    <td class="p-5 border-b border-slate-100 font-black text-forest">${paymentDetails}</td>
                     <td class="p-5 border-b border-slate-100">
                         ${statusBadge}
                     </td>
                     <td class="p-5 border-b border-slate-100 text-right whitespace-nowrap">
                         <div class="flex items-center justify-end gap-2">
+                        ${verifyBtn}
                         ${isSent 
                             ? `<span class="text-xs font-mono font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200">ID: ${o.courier_consignment_id}</span>` 
                             : `<button onclick='sendToSteadfast(${JSON.stringify(o).replace(/'/g, "&#39;")})' class="bg-forest hover:bg-forestHover text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow-sm">Send</button>`
@@ -781,6 +798,17 @@
                     </td>
                 `;
                 tbody.appendChild(tr);
+            });
+        }
+
+        function verifyOrder(id) {
+            showModal("Verify Payment", `Are you sure you have received the bKash/Nagod payment for order #${id}?`, true, async () => {
+                const { error } = await supabaseClient.from('orders').update({ order_status: 'verified' }).eq('id', id);
+                if (error) showModal("Error", error.message);
+                else {
+                    loadOrders(); 
+                    loadDashboardStats(); 
+                }
             });
         }
 
