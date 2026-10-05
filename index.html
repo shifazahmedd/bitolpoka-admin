@@ -321,6 +321,16 @@
                                 <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Delivery Charge (৳)</label>
                                 <input type="number" id="delivery_charge" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-forest/10 focus:border-forest outline-none transition-all font-medium text-sm">
                             </div>
+
+                            <div class="pt-4 border-t border-slate-100">
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">bKash/Nagod Number</label>
+                                <input type="text" id="bkash_number" placeholder="e.g. 01700000000" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-forest/10 focus:border-forest outline-none transition-all font-medium text-sm font-mono tracking-widest text-[#E2136E]">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Payment Instructions (Shown to Customer)</label>
+                                <textarea id="payment_instructions" rows="3" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-forest/10 focus:border-forest outline-none transition-all font-medium text-sm resize-none"></textarea>
+                            </div>
                         </div>
 
                         <!-- Column 2: API Config -->
@@ -369,9 +379,9 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_BQFducZtr7aIkYW4G8t7VA_p77ORs24';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        let settings = { id: 1, whatsapp_number: '', delivery_charge: 150, steadfast_api_key: '', steadfast_secret_key: '' };
+        let settings = { id: 1, whatsapp_number: '', delivery_charge: 150, steadfast_api_key: '', steadfast_secret_key: '', bkash_number: '', payment_instructions: '' };
         
-        // Pagination & Global Data Variables
+        // Orders Pagination Variables
         let currentOrdersData = []; 
         let currentProductsData = []; // FIX: Added this to safely store products in the background
         let currentPage = 1;
@@ -513,6 +523,8 @@
                 settings = data;
                 document.getElementById('whatsapp_number').value = data.whatsapp_number || '';
                 document.getElementById('delivery_charge').value = data.delivery_charge || 150;
+                document.getElementById('bkash_number').value = data.bkash_number || '';
+                document.getElementById('payment_instructions').value = data.payment_instructions || 'To confirm your order, please send your payment to our bKash/Nagod Personal number via Send Money. Enter your TrxID below.';
                 document.getElementById('steadfast_api').value = data.steadfast_api_key || '';
                 document.getElementById('steadfast_secret').value = data.steadfast_secret_key || '';
             }
@@ -524,6 +536,8 @@
                 id: 1,
                 whatsapp_number: document.getElementById('whatsapp_number').value,
                 delivery_charge: document.getElementById('delivery_charge').value,
+                bkash_number: document.getElementById('bkash_number').value,
+                payment_instructions: document.getElementById('payment_instructions').value,
                 steadfast_api_key: document.getElementById('steadfast_api').value,
                 steadfast_secret_key: document.getElementById('steadfast_secret').value
             };
