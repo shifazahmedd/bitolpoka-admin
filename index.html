@@ -348,6 +348,19 @@
                             </div>
                         </div>
 
+                        <!-- NEW: Marketing & Tracking Config -->
+                        <div class="space-y-6 lg:col-span-2 border-t border-slate-100 pt-6">
+                            <h3 class="text-base font-extrabold text-slate-900 pb-3 flex items-center gap-2 text-blue-600">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20v-6M6 20V10M18 20V4"></path></svg>
+                                Marketing & Tracking
+                            </h3>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Meta (Facebook) Pixel ID</label>
+                                <input type="text" id="meta_pixel_id" placeholder="e.g., 123456789012345" class="w-full lg:w-1/2 p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium text-sm">
+                                <p class="text-xs text-slate-400 mt-2">Enter your Pixel ID to automatically track visitors and purchases from your FB Ads/Reels.</p>
+                            </div>
+                        </div>
+
                     </div>
 
                     <!-- Footer Action -->
@@ -521,10 +534,9 @@
                 settings = data;
                 document.getElementById('whatsapp_number').value = data.whatsapp_number || '';
                 document.getElementById('delivery_charge').value = data.delivery_charge || 150;
-                document.getElementById('bkash_number').value = data.bkash_number || '';
-                document.getElementById('payment_instructions').value = data.payment_instructions || 'To confirm your order, please send your payment to our bKash/Nagod Personal number via Send Money. Enter your TrxID below.';
                 document.getElementById('steadfast_api').value = data.steadfast_api_key || '';
                 document.getElementById('steadfast_secret').value = data.steadfast_secret_key || '';
+                document.getElementById('meta_pixel_id').value = data.meta_pixel_id || '';
             }
         }
 
@@ -534,10 +546,9 @@
                 id: 1,
                 whatsapp_number: document.getElementById('whatsapp_number').value,
                 delivery_charge: document.getElementById('delivery_charge').value,
-                bkash_number: document.getElementById('bkash_number').value,
-                payment_instructions: document.getElementById('payment_instructions').value,
                 steadfast_api_key: document.getElementById('steadfast_api').value,
-                steadfast_secret_key: document.getElementById('steadfast_secret').value
+                steadfast_secret_key: document.getElementById('steadfast_secret').value,
+                meta_pixel_id: document.getElementById('meta_pixel_id').value
             };
 
             const { error } = await supabaseClient.from('store_settings').upsert(payload);
