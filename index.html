@@ -544,7 +544,7 @@
                     statusBadge = `<span class="px-3 py-1.5 text-xs font-bold rounded-xl bg-blue-50 text-blue-600 border border-blue-100">Shipped</span>`;
                 } else if (o.payment_method === 'bKash/Nagod' && o.order_status === 'pending') {
                     statusBadge = `<span class="px-3 py-1.5 text-xs font-bold rounded-xl bg-pink-50 text-pink-600 border border-pink-200">Needs Verification</span>`;
-                    verifyBtn = `<button onclick='verifyOrder(${o.id})' class="bg-green-100 text-green-700 text-xs font-bold px-4 py-2.5 rounded-xl">Verify</button>`;
+                    verifyBtn = `<button onclick='verifyOrder(${o.id})' class="bg-green-100 text-green-700 text-xs font-bold px-4 py-2.5 rounded-xl mr-2">Verify</button>`;
                 } else if (o.order_status === 'verified') {
                     statusBadge = `<span class="px-3 py-1.5 text-xs font-bold rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200">Payment Verified</span>`;
                 } else {
@@ -619,6 +619,7 @@
                     const order = currentOrdersData.find(o => o.id === parseInt(cb.value));
                     if(order) {
                         try {
+                            // CONNECTING DIRECTLY TO YOUR NEW VERCEL BACKEND
                             const response = await fetch('/api/steadfast', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
@@ -644,6 +645,7 @@
             if (!settings.steadfast_api_key || !settings.steadfast_secret_key) return showModal("Error", "Missing Steadfast API Keys in Settings.");
             showModal("Dispatch", `Send order #${order.id} to Steadfast?`, true, async () => {
                 try {
+                    // CONNECTING DIRECTLY TO YOUR NEW VERCEL BACKEND
                     const response = await fetch('/api/steadfast', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
