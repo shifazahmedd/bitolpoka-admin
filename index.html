@@ -99,17 +99,17 @@
                 
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse whitespace-nowrap">
+                        <table class="w-full text-left border-collapse">
                             <thead>
-                                <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs uppercase tracking-wider">
-                                    <th class="p-5 w-12 text-center"><input type="checkbox" id="select-all-orders" onchange="toggleAllOrders(this)" class="w-4 h-4 text-forest rounded border-slate-300 focus:ring-forest cursor-pointer"></th>
-                                    <th class="p-5 font-bold">ID</th>
-                                    <th class="p-5 font-bold">Customer</th>
-                                    <th class="p-5 font-bold">Address</th>
-                                    <th class="p-5 font-bold">Product</th>
-                                    <th class="p-5 font-bold">Total & Payment</th>
-                                    <th class="p-5 font-bold">Status</th>
-                                    <th class="p-5 font-bold text-right">Options</th>
+                                <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs uppercase tracking-wider whitespace-nowrap">
+                                    <th class="p-4 w-12 text-center"><input type="checkbox" id="select-all-orders" onchange="toggleAllOrders(this)" class="w-4 h-4 text-forest rounded border-slate-300 focus:ring-forest cursor-pointer"></th>
+                                    <th class="p-4 font-bold">ID</th>
+                                    <th class="p-4 font-bold">Customer</th>
+                                    <th class="p-4 font-bold">Address</th>
+                                    <th class="p-4 font-bold">Product</th>
+                                    <th class="p-4 font-bold">Total & Payment</th>
+                                    <th class="p-4 font-bold">Status</th>
+                                    <th class="p-4 font-bold text-right">Options</th>
                                 </tr>
                             </thead>
                             <tbody id="orders-list" class="divide-y divide-slate-100"></tbody>
@@ -141,15 +141,15 @@
                 
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse whitespace-nowrap">
+                        <table class="w-full text-left border-collapse">
                             <thead>
-                                <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs uppercase tracking-wider">
-                                    <th class="p-5 font-bold">ID</th>
-                                    <th class="p-5 font-bold">Customer</th>
-                                    <th class="p-5 font-bold">Phone</th>
-                                    <th class="p-5 font-bold">Product</th>
-                                    <th class="p-5 font-bold">Total</th>
-                                    <th class="p-5 font-bold text-right">Options</th>
+                                <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs uppercase tracking-wider whitespace-nowrap">
+                                    <th class="p-4 font-bold">ID</th>
+                                    <th class="p-4 font-bold">Customer</th>
+                                    <th class="p-4 font-bold">Phone</th>
+                                    <th class="p-4 font-bold">Product</th>
+                                    <th class="p-4 font-bold">Total</th>
+                                    <th class="p-4 font-bold text-right">Options</th>
                                 </tr>
                             </thead>
                             <tbody id="trash-list" class="divide-y divide-slate-100"></tbody>
@@ -223,14 +223,14 @@
 
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse whitespace-nowrap">
+                        <table class="w-full text-left border-collapse">
                             <thead>
-                                <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs uppercase tracking-wider">
-                                    <th class="p-5 font-bold">Image</th>
-                                    <th class="p-5 font-bold">Name & Details</th>
-                                    <th class="p-5 font-bold">Base Price</th>
-                                    <th class="p-5 font-bold">Packages Setup</th>
-                                    <th class="p-5 font-bold text-right">Actions</th>
+                                <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs uppercase tracking-wider whitespace-nowrap">
+                                    <th class="p-4 font-bold">Image</th>
+                                    <th class="p-4 font-bold">Name & Details</th>
+                                    <th class="p-4 font-bold">Base Price</th>
+                                    <th class="p-4 font-bold">Packages Setup</th>
+                                    <th class="p-4 font-bold text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="products-list" class="divide-y divide-slate-100"></tbody>
@@ -294,7 +294,7 @@
     <div id="custom-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-[2rem] shadow-2xl max-w-sm w-full p-8 transform transition-all border border-slate-100">
             <h3 id="modal-title" class="text-2xl font-extrabold text-slate-900 mb-2">Notice</h3>
-            <p id="modal-message" class="text-slate-500 mb-8 font-medium leading-relaxed"></p>
+            <p id="modal-message" class="text-slate-500 mb-8 font-medium leading-relaxed max-h-48 overflow-y-auto"></p>
             <div class="flex justify-end gap-3">
                 <button id="modal-cancel" class="px-6 py-3 bg-slate-100 text-slate-700 rounded-xl font-bold hidden">Cancel</button>
                 <button id="modal-confirm" class="px-6 py-3 bg-forest text-white rounded-xl font-bold">OK</button>
@@ -424,11 +424,11 @@
                 const payBadge = p.payment_option === 'Advance Payment' ? `<span class="px-2 py-1 text-[10px] font-bold bg-pink-100 text-pink-700 border border-pink-200 rounded-md uppercase">Advance Only</span>` : `<span class="px-2 py-1 text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200 rounded-md uppercase">COD</span>`;
 
                 tr.innerHTML = `
-                    <td class="p-5 border-b border-slate-100"><img src="${imgUrl}" onerror="this.src='https://placehold.co/100x100/e2e8f0/475569?text=No+Image'" class="w-12 h-12 object-cover rounded-xl border"></td>
-                    <td class="p-5 border-b border-slate-100"><p class="font-bold text-slate-900 mb-1">${p.name}</p>${catBadge}</td>
-                    <td class="p-5 border-b border-slate-100"><span class="font-extrabold text-forest">৳${p.price}</span> <span class="text-xs font-bold text-slate-500">/ ${p.unit_type || 'pcs'}</span></td>
-                    <td class="p-5 border-b border-slate-100 flex flex-col gap-1 items-start min-h-[5rem]">${payBadge}<span class="text-xs font-mono font-bold text-slate-500">${p.packages || '-'}</span></td>
-                    <td class="p-5 border-b border-slate-100 text-right whitespace-nowrap">
+                    <td class="p-4 border-b border-slate-100"><img src="${imgUrl}" onerror="this.src='https://placehold.co/100x100/e2e8f0/475569?text=No+Image'" class="w-12 h-12 object-cover rounded-xl border"></td>
+                    <td class="p-4 border-b border-slate-100 whitespace-normal min-w-[150px]"><p class="font-bold text-slate-900 mb-1">${p.name}</p>${catBadge}</td>
+                    <td class="p-4 border-b border-slate-100 whitespace-nowrap"><span class="font-extrabold text-forest">৳${p.price}</span> <span class="text-xs font-bold text-slate-500">/ ${p.unit_type || 'pcs'}</span></td>
+                    <td class="p-4 border-b border-slate-100 flex flex-col gap-1 items-start min-h-[5rem] whitespace-normal min-w-[120px]">${payBadge}<span class="text-xs font-mono font-bold text-slate-500">${p.packages || '-'}</span></td>
+                    <td class="p-4 border-b border-slate-100 text-right whitespace-nowrap">
                         <button onclick="editProduct(${p.id})" class="bg-slate-100 text-slate-700 font-bold px-4 py-2.5 rounded-xl mr-2 text-sm">Edit</button>
                         <button onclick="deleteProductRow(${p.id})" class="bg-red-50 text-red-600 font-bold px-4 py-2.5 rounded-xl text-sm">Delete</button>
                     </td>
@@ -559,14 +559,14 @@
                 }
 
                 tr.innerHTML = `
-                    <td class="p-5 border-b border-slate-100 text-center"><input type="checkbox" value="${o.id}" class="order-checkbox w-4 h-4 text-forest rounded" onchange="updateBulkButton()" ${isSent ? 'disabled' : ''}></td>
-                    <td class="p-5 border-b border-slate-100 text-sm font-bold text-slate-400">#${o.id}</td>
-                    <td class="p-5 border-b border-slate-100 font-bold text-slate-900">${o.customer_name}<br><span class="text-xs font-medium text-slate-500">${o.customer_phone}</span></td>
-                    <td class="p-5 border-b border-slate-100 text-sm max-w-xs truncate text-slate-500">${o.delivery_address}</td>
-                    <td class="p-5 border-b border-slate-100 text-sm font-bold text-slate-700">${o.product_name || 'N/A'}<br><span class="text-xs text-slate-500">Qty: ${o.quantity || '-'}</span></td>
-                    <td class="p-5 border-b border-slate-100 font-black text-forest">${paymentDetails}</td>
-                    <td class="p-5 border-b border-slate-100">${statusBadge}</td>
-                    <td class="p-5 border-b border-slate-100 text-right whitespace-nowrap">
+                    <td class="p-4 border-b border-slate-100 text-center"><input type="checkbox" value="${o.id}" class="order-checkbox w-4 h-4 text-forest rounded" onchange="updateBulkButton()" ${isSent ? 'disabled' : ''}></td>
+                    <td class="p-4 border-b border-slate-100 text-sm font-bold text-slate-400 whitespace-nowrap">#${o.id}</td>
+                    <td class="p-4 border-b border-slate-100 font-bold text-slate-900 whitespace-nowrap">${o.customer_name}<br><span class="text-xs font-medium text-slate-500">${o.customer_phone}</span></td>
+                    <td class="p-4 border-b border-slate-100 text-sm text-slate-500 max-w-[150px] lg:max-w-[200px] truncate" title="${o.delivery_address}">${o.delivery_address}</td>
+                    <td class="p-4 border-b border-slate-100 text-sm font-bold text-slate-700 min-w-[150px] whitespace-normal">${o.product_name || 'N/A'}<br><span class="text-xs text-slate-500">Qty: ${o.quantity || '-'}</span></td>
+                    <td class="p-4 border-b border-slate-100 font-black text-forest whitespace-nowrap">${paymentDetails}</td>
+                    <td class="p-4 border-b border-slate-100 whitespace-nowrap">${statusBadge}</td>
+                    <td class="p-4 border-b border-slate-100 text-right whitespace-nowrap">
                         <div class="flex items-center justify-end gap-2">
                         ${verifyBtn}
                         ${isSent ? `<span class="text-xs font-mono font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-xl border">ID: ${o.courier_consignment_id}</span>` : `<button onclick='sendToSteadfast(${JSON.stringify(o).replace(/'/g, "&#39;")})' class="bg-forest text-white text-xs font-bold px-4 py-2.5 rounded-xl">Send</button>`}
@@ -607,6 +607,33 @@
             else { btn.classList.add('hidden'); }
         }
 
+        // ==========================================
+        // VERCEL API FETCH LOGIC (UPDATED WITH ERROR CATCHING)
+        // ==========================================
+        async function runVercelFetch(url, payload) {
+            let response, text;
+            try {
+                response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                text = await response.text();
+            } catch (err) {
+                throw new Error("Could not reach Vercel. Make sure api/steadfast.js is in your GitHub repo.");
+            }
+
+            let json;
+            try {
+                json = JSON.parse(text);
+            } catch (err) {
+                throw new Error(`Vercel returned a 404/500 error instead of data. Check that api/steadfast.js exists.\n\nDetails: ${text.substring(0, 100)}...`);
+            }
+
+            if (!response.ok) throw new Error(json.message || json.error || "Unknown API Error");
+            return json;
+        }
+
         function bulkSendToSteadfast() {
             const checkboxes = document.querySelectorAll('.order-checkbox:checked');
             if(checkboxes.length === 0) return;
@@ -615,25 +642,28 @@
             showModal("Confirm Dispatch", `Send ${checkboxes.length} orders to Steadfast?`, true, async () => {
                 showModal("Processing...", "Sending to Steadfast via Vercel...");
                 let successCount = 0, failCount = 0;
+                
                 for(let cb of checkboxes) {
                     const order = currentOrdersData.find(o => o.id === parseInt(cb.value));
                     if(order) {
                         try {
-                            // CONNECTING DIRECTLY TO YOUR NEW VERCEL BACKEND
-                            const response = await fetch('/api/steadfast', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    api_key: settings.steadfast_api_key, secret_key: settings.steadfast_secret_key,
-                                    order_data: { invoice: order.id.toString(), recipient_name: order.customer_name, recipient_phone: order.customer_phone, recipient_address: order.delivery_address, cod_amount: order.total_amount }
-                                })
+                            const result = await runVercelFetch('/api/steadfast', {
+                                api_key: settings.steadfast_api_key, 
+                                secret_key: settings.steadfast_secret_key,
+                                order_data: { 
+                                    invoice: order.id.toString(), 
+                                    recipient_name: order.customer_name, 
+                                    recipient_phone: order.customer_phone, 
+                                    recipient_address: order.delivery_address, 
+                                    cod_amount: order.total_amount 
+                                }
                             });
-                            const result = await response.json();
-                            if (response.ok && result.status !== 400) {
+
+                            if (result.status !== 400) {
                                 await supabaseClient.from('orders').update({ courier_consignment_id: result.consignment?.consignment_id || "SENT", order_status: 'shipped' }).eq('id', order.id);
                                 successCount++;
                             } else { failCount++; }
-                        } catch (err) { failCount++; }
+                        } catch (err) { failCount++; console.error(err); }
                     }
                 }
                 showModal("Complete", `Sent: ${successCount}. Failed: ${failCount}.`);
@@ -643,23 +673,32 @@
 
         function sendToSteadfast(order) {
             if (!settings.steadfast_api_key || !settings.steadfast_secret_key) return showModal("Error", "Missing Steadfast API Keys in Settings.");
+            
             showModal("Dispatch", `Send order #${order.id} to Steadfast?`, true, async () => {
                 try {
-                    // CONNECTING DIRECTLY TO YOUR NEW VERCEL BACKEND
-                    const response = await fetch('/api/steadfast', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            api_key: settings.steadfast_api_key, secret_key: settings.steadfast_secret_key,
-                            order_data: { invoice: order.id.toString(), recipient_name: order.customer_name, recipient_phone: order.customer_phone, recipient_address: order.delivery_address, cod_amount: order.total_amount }
-                        })
+                    const result = await runVercelFetch('/api/steadfast', {
+                        api_key: settings.steadfast_api_key, 
+                        secret_key: settings.steadfast_secret_key,
+                        order_data: { 
+                            invoice: order.id.toString(), 
+                            recipient_name: order.customer_name, 
+                            recipient_phone: order.customer_phone, 
+                            recipient_address: order.delivery_address, 
+                            cod_amount: order.total_amount 
+                        }
                     });
-                    const result = await response.json();
-                    if (!response.ok || result.status === 400) return showModal("Error", result.message || "Steadfast Error");
+
+                    if (result.status === 400) {
+                        return showModal("Steadfast Error", result.message || "Invalid order details.");
+                    }
+
                     await supabaseClient.from('orders').update({ courier_consignment_id: result.consignment?.consignment_id || "SENT", order_status: 'shipped' }).eq('id', order.id);
                     showModal("Success", "Sent to Steadfast!");
                     loadOrders(); loadDashboardStats();
-                } catch (err) { showModal("Error", "Failed to connect to Vercel API /api/steadfast."); }
+
+                } catch (err) { 
+                    showModal("Connection Error", err.message); 
+                }
             });
         }
 
@@ -671,12 +710,12 @@
             orders.forEach(o => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td class="p-5 text-sm font-bold text-slate-400">#${o.id}</td>
-                    <td class="p-5 font-bold text-slate-900">${o.customer_name}</td>
-                    <td class="p-5 text-sm font-medium text-slate-600">${o.customer_phone}</td>
-                    <td class="p-5 text-sm font-bold text-slate-700">${o.product_name || 'N/A'}</td>
-                    <td class="p-5 font-black text-slate-700">৳${o.total_amount}</td>
-                    <td class="p-5 text-right whitespace-nowrap">
+                    <td class="p-4 text-sm font-bold text-slate-400 whitespace-nowrap">#${o.id}</td>
+                    <td class="p-4 font-bold text-slate-900 whitespace-nowrap">${o.customer_name}</td>
+                    <td class="p-4 text-sm font-medium text-slate-600 whitespace-nowrap">${o.customer_phone}</td>
+                    <td class="p-4 text-sm font-bold text-slate-700 whitespace-normal min-w-[150px]">${o.product_name || 'N/A'}</td>
+                    <td class="p-4 font-black text-slate-700 whitespace-nowrap">৳${o.total_amount}</td>
+                    <td class="p-4 text-right whitespace-nowrap">
                         <button onclick='restoreOrder(${o.id})' class="bg-blue-50 text-blue-600 text-xs font-bold px-4 py-2.5 rounded-xl mr-2">Restore</button>
                         <button onclick='permanentlyDeleteOrder(${o.id})' class="bg-red-50 text-red-600 text-xs font-bold px-4 py-2.5 rounded-xl">Delete Forever</button>
                     </td>
