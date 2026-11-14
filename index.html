@@ -411,6 +411,12 @@
         async function loadProducts() {
             const { data: products } = await supabaseClient.from('products').select('*').order('category', { ascending: false }).order('sort_order', { ascending: true }).order('created_at', { ascending: false });
             currentProductsData = products || [];
+            
+            // 🐛 MAGIC FIX: Force strict sequential sort orders so swapping always works perfectly!
+            currentProductsData.forEach((p, index) => {
+                p.sort_order = index;
+            });
+            
             renderProductsTable();
         }
 
